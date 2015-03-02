@@ -11,7 +11,6 @@ App.log = function(message){
 }	
 
 App.timeline.init = function(){
-	App.log('init');
 	
 	App.dom.appMain = document.getElementById('appMain');
 
@@ -20,8 +19,8 @@ App.timeline.init = function(){
 	App.dom.elemY = document.getElementById('elemY');	
 	App.dom.elemZ = document.getElementById('elemZ')
 	
+	App.utils.goTo(1, 0);
 	
-	App.timeline.doStep(1);
 }
 
 App.timeline.doStep = function(whatStep){
@@ -53,7 +52,6 @@ App.timeline.doStep = function(whatStep){
 }
 
 App.timeline.boxAnim = function(whatStep, elem){
-	//App.log("doStep "+whatStep+" on "+ elem.id);
 	switch(whatStep){
 		case 1 :
 			App.superTween(elem, 1, {x: 600, y: 60, scaleX: 0.2, scaleY: 0.5,
@@ -97,5 +95,5 @@ App.utils.goTo = function(whatStep, timeout){
 	}, timeout);
 }
 
-document.onload = App.timeline.init();
+App.timeline.init();
 
