@@ -31,17 +31,17 @@ App.timeline.doStep = function(whatStep){
 			break;
 		
 		case 1:	
-			App.timeline.boxAnim(1, App.dom.elemW);			
+			App.timeline.boxAnim(1, App.dom.elemW);	
 			App.utils.goTo(2, 2500);
 			break;
 			
 		case 2:
-			App.timeline.boxAnim(1, App.dom.elemX)
+			App.timeline.boxAnim(1, App.dom.elemX);
 			App.utils.goTo(3, 2500);
 			break;
 			
 		case 3:
-			App.timeline.boxAnim(1, App.dom.elemY)
+			App.timeline.boxAnim(1, App.dom.elemY);
 			App.utils.goTo(4, 2500);
 			break;
 			
