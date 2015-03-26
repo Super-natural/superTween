@@ -25,13 +25,11 @@
  * currently supports down to IE8
  */
 
-var Ad = Ad || {};
-	Ad.superTween = Ad.superTween || {};
 
 var glob = {
   	updateRate: 30,
   	loopTimer: null,
-  	availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX'] //currently animatable attributes
+  	availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
 }
 var anims = [];
 
@@ -44,7 +42,7 @@ var anims = [];
  *			onCompleteParams: parameters for the oncomplete function
  *			ease: ease to use for tween
 */
-Ad.superTween = function(elem, time, obj){
+var superTween = function(elem, time, obj){
 
 
 	time = time*1000;
@@ -53,9 +51,7 @@ Ad.superTween = function(elem, time, obj){
 	anims.push(setupTween(elem, time, obj));
 
 	if(!glob.loopTimer){
-		if (Ad.config.adRunning){
-			glob.loopTimer = setTimeout(tweenLoop, glob.updateRate);
-		}
+		glob.loopTimer = setTimeout(tweenLoop, glob.updateRate);
 	}
 }
 
@@ -194,6 +190,36 @@ function getPos(elem, attr, backupVal){
 							else {return 1}
 			}
 			break;
+		case 'rotate' :
+			if('getComputedStyle' in  window){
+				var st =  window.getComputedStyle(elem, null);
+				var tr = st.getPropertyValue("-webkit-transform") ||
+				         st.getPropertyValue("-moz-transform") ||
+				         st.getPropertyValue("-ms-transform") ||
+				         st.getPropertyValue("-o-transform") ||
+				         st.getPropertyValue("transform")
+
+				//console.log(tr)
+				if (tr == 'none' || !tr){
+					 return 0;
+				} else {
+					var values = tr.split('(')[1].split(')')[0].split(',');
+					var a = values[0];
+					var b = values[1];
+					var c = values[2];
+					var d = values[3];
+					var scale = Math.sqrt(a*a + b*b);
+					var sin = b/scale;
+					var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+
+					return angle;
+				}
+
+			} else {
+				if(backupVal > 0){return 0}
+							else {return 180}
+			}
+			break;
 
 		default:
 			//App.log("!! ATTRIBUTE NOT RECOGNISED "+attr+" !!")
@@ -226,10 +252,18 @@ function setPos(elem, obj, val){
 				elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
 			}
 			break;
+
+		case 'rotate' :
+			elem.style.webkitTransform = 'rotate('+val+'deg)';
+			elem.style.mozTransform    = 'rotate('+val+'deg)';
+			elem.style.msTransform     = 'rotate('+val+'deg)';
+			elem.style.oTransform      = 'rotate('+val+'deg)';
+			elem.style.transform       = 'rotate('+val+'deg)';
+			break;
 	}
 }
 function getTarg(attr, targ, orig, elem){
-	if(attr == 'x' || attr == 'y' || attr == 'opacity'){
+	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
 		return targ - orig;
 	} else if(attr == 'scaleX'){
 		return (targ * elem.getAttribute('data-startW')) - orig;
