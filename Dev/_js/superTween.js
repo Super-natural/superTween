@@ -1,38 +1,18 @@
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
- * Based on Robert Penners Easing functions
- * v0.1.1, last commit 02/03/15
+ * Based on Robert Penners Easing Equations
  * currently supports down to IE8
  */
 
-
-
-/* @param elem: element to be tweened
- * @param time: length of animation
- * @param obj{
- *	 		delay: Dime to delay (in seconds)
- *			onComplete: Function to run after animation completion
- *			onCompleteParams: parameters for the oncomplete function
- *			ease: ease to use for tween
-*/
-
-
-/*
- * Super natural's Tween Engine
- * http://www.wearesupernatural.com/
- * Based on Robert Penners Easing functions
- * currently supports down to IE8
- */
-
-
+//Globals
 var glob = {
   	updateRate: 30,
   	loopTimer: null,
   	availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
 }
 var anims = [];
-
+var superTween = {}
 
 /* @param elem: element to be tweened
  * @param time: length of animation
@@ -42,8 +22,7 @@ var anims = [];
  *			onCompleteParams: parameters for the oncomplete function
  *			ease: ease to use for tween
 */
-var superTween = function(elem, time, obj){
-
+superTween.to = function(elem, time, obj){
 
 	time = time*1000;
 	obj.delay = obj.delay*1000;
@@ -53,6 +32,11 @@ var superTween = function(elem, time, obj){
 	if(!glob.loopTimer){
 		glob.loopTimer = setTimeout(tweenLoop, glob.updateRate);
 	}
+}
+
+superTween.killAll = function(){
+    clearTimeout(glob.loopTimer);
+    anims = [];
 }
 
 /*
