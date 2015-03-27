@@ -1,4 +1,4 @@
-/*! SuperTween version 0.0.1. Created 27-03-2015 */
+/*! SuperTween version 0.2.0. Created 27-03-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
