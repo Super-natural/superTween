@@ -1,13 +1,8 @@
 var App = App || {};
+	App.superTween = window.superTween;
 	App.timeline = App.timeline || {};
 	App.dom = App.dom || {};
 	App.utils = App.utils || {};
-
-
-App.config = {
-	thisEase: Linear.easeNone,
-}
-
 
 App.log = function(message){
 	if('console' in  window){
@@ -17,8 +12,6 @@ App.log = function(message){
 
 App.timeline.init = function(){
 
-	App.superTween = superTween;
-
 	App.dom.appMain = document.getElementById('appMain');
 
 	App.dom.elemW = document.getElementById('elemW');
@@ -26,15 +19,22 @@ App.timeline.init = function(){
 	App.dom.elemY = document.getElementById('elemY');
 	App.dom.elemZ = document.getElementById('elemZ')
 
-	App.utils.goTo(1, 0);
+	App.utils.goTo(0, 0);
 
 }
 
 App.timeline.doStep = function(whatStep){
 	switch(whatStep){
 		case 0:
-			App.superTween.to(App.dom.elemW, 1, {rotate: 45, ease: App.config.thisEase});
-			App.utils.goTo(10, 2500);
+			console.log("step 0")
+			App.superTween.to(App.dom.elemW, 1, {rotate: 45, ease: Linear.easeNone});
+			App.utils.goTo(2, 2500);
+			break;
+
+		case 10:
+			console.log("step 10")
+			App.superTween.to(App.dom.elemW, 1, {rotate: 0, ease: Linear.easeNone});
+			App.utils.goTo(0, 2500);
 			break;
 
 		case 1:
@@ -71,7 +71,7 @@ App.timeline.boxAnim = function(whatStep, elem){
 			break;
 
 		case 2 :
-			App.superTween.to(elem, 3, {x: 500, y: 700, opacity: 0, scaleX: 0.7, scaleY: 0.3, rotate: 45,
+			App.superTween.to(elem, 3, {x: 500, y: 700, opacity: 0, scaleX: 0.7, scaleY: 0.3, rotate: 90,
 									   ease: Sine.easeInOut,
 									   onComplete: App.timeline.boxAnim,
 									   onCompleteParams: [3, elem]
@@ -79,7 +79,7 @@ App.timeline.boxAnim = function(whatStep, elem){
 			break;
 
 		case 3 :
-			App.superTween.to(elem, 2, {y: 50, x: 350, opacity: 1, scaleX: 1.5, scaleY: 0.8, rotate: 270,
+			App.superTween.to(elem, 2, {y: 50, x: 350, opacity: 1, scaleX: 1.5, scaleY: 0.8, rotate: 45,
 									   ease: Back.easeOut,
 									   onComplete: App.timeline.boxAnim,
 									   onCompleteParams: [4, elem]
