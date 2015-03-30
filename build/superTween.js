@@ -1,4 +1,4 @@
-/*! SuperTween version 0.2.0. Created 27-03-2015 */
+/*! SuperTween version 0.2.1. Created 30-03-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -234,8 +234,10 @@ function setPos(elem, obj, val){
 
 			//IE8 Opacity fix
 			if ('filters' in elem){
-				elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
-			}
+                if(elem.filters.item){
+				    elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
+			    }
+            }
 			break;
 
 		case 'rotate' :

@@ -233,8 +233,10 @@ function setPos(elem, obj, val){
 
 			//IE8 Opacity fix
 			if ('filters' in elem){
-				elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
-			}
+                if(elem.filters.item){
+				    elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
+			    }
+            }
 			break;
 
 		case 'rotate' :
