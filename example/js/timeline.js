@@ -19,7 +19,7 @@ App.timeline.init = function(){
 	App.dom.elemY = document.getElementById('elemY');
 	App.dom.elemZ = document.getElementById('elemZ')
 
-	App.utils.goTo(0, 0);
+	App.utils.goTo(1, 0);
 
 }
 
