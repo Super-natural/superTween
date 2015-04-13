@@ -4,24 +4,27 @@
  * Based on Robert Penners Easing Equations
  * currently supports down to IE8
  */
+
+ /*
+ 			TO DO
+ 		- figure out that damn transform origin z-origin bug
+ 		- strange rotation but difference between CSS and JS
+ 		- JS override
+ */
+
+
  var superTween = {
-     fn: {}
- };
-
-//Globals
-var glob = {
-  	loopTimer: null,
-    useCSS: false,
-  	availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
-}
-
+     fn: {},
+     useCSS: false,
+     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
+};
 
 
 //Variables for a javascript tween
 var JSTween = {
     updateRate: 30,
     loopTimer: null,
-    curAnims: []
+    curAnims: [],
 }
 
 
@@ -30,15 +33,15 @@ var JSTween = {
 */
 superTween.init = function(){
     domPrefixes = 'Webkit Moz ms O'.split(' ');
-    elm = document.createElement('div');
+    elem = document.createElement('div');
 
-    if( elm.style.transition !== undefined ) { glob.useCSS = true; }
-    if( glob.useCSS === false ) {
+    if( elem.style.transition !== undefined ) { superTween.useCSS = true; }
+    if( superTween.useCSS === false ) {
         feat = "transition";
         featurenameCapital = feat.charAt(0).toUpperCase() + feat.substr(1);
         for( var i = 0; i < domPrefixes.length; i++ ) {
-            if( elm.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
-                glob.useCSS = true;
+            if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
+                superTween.useCSS = true;
               break;
             }
         }
@@ -58,10 +61,11 @@ superTween.init = function(){
  *			ease: ease to use for tween
 */
 superTween.to = function(elem, time, obj){
-
-
-//    glob.useCSS = false;
-
+    /*
+    if(obj.useJS){
+        superTween.useCSS = false;
+    }
+    */
 
 	time = time*1000;
 	obj.delay = obj.delay*1000;
@@ -74,18 +78,17 @@ superTween.to = function(elem, time, obj){
    elem.style.transformOrigin = '0';
 */
 
-
-
-    if(glob.useCSS && CSSTween){
-
+    //If the CSS plugin is available as well as supported by browser, use CSS
+    if(superTween.useCSS && CSSTween){
+        console.log(obj.useJS)
         CSSTween.applyCSSTransition(newTween);
 
     } else {
 
         JSTween.curAnims.push(newTween);
 
-    	if(!glob.loopTimer){
-    		glob.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+    	if(!JSTween.loopTimer){
+            JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
     	}
     }
 }
@@ -94,23 +97,30 @@ superTween.to = function(elem, time, obj){
  * Kills all active Tweens
 */
 superTween.killAll = function(){
-    clearTimeout(glob.loopTimer);
+    clearTimeout(JSTween.loopTimer);
     JSTween.curAnims = [];
+
+    for (var anim in CSSTween.curAnims){
+        for(var prop in CSSTween.tweenStyles){
+            CSSTween.curAnims[anim].elem.style[prop] = null;
+        }
+    }
 }
 
 
 /*
  * Initialises a tween and does the math to work out what does what
+ * @param elem: element the tween is acting upon
+ * @param time: length of time of tween
+ * @param obj: object containing all the tween variables
 */
 superTween.fn.setupTween = function(elem, time, obj){
 	if(!obj.ease){obj.ease = 'Sine.easeInOut'}
 
-
-
     var easeEx = obj.ease.split(".");
     var chosenEase = "";
 
-    if(glob.useCSS){
+    if(superTween.useCSS){
         chosenEase = CSSEase[easeEx[0]][easeEx[1]]
     } else{
         chosenEase = JSEase[easeEx[0]][easeEx[1]]
@@ -118,26 +128,28 @@ superTween.fn.setupTween = function(elem, time, obj){
 
 
 	var tweenObj = {
-		attr: superTween.fn.getAttr(elem, obj),
-        rawObj: obj,
-        rawTime: time,
-        rawDelay:obj.delay,
-		d: Math.floor(time/JSTween.updateRate),
-		delaySteps: Math.floor(obj.delay/JSTween.updateRate),
-		curDel: false,
-		t: 0,
-		curDelStep: 0,
-		elem: elem,
-		ease: chosenEase,//obj.ease,
-		onComplete: obj.onComplete,
-		onCompleteParams: obj.onCompleteParams
+		attr: superTween.fn.getAttr(elem, obj),       //attribute(s) changing for the element
+        elem: elem,                                   //element under question
+		ease: chosenEase,                             //ease to use for the tween
+
+        rawObj: obj,                                  //the raw object called in the timeline (for CSS)
+        rawTime: time,                                //the raw time (for CSS)
+        rawDelay:obj.delay,                           //raw delay amt, (for CSS)
+
+        d: Math.floor(time/JSTween.updateRate),       //variable used in penners equations within the JS eases, duration in steps
+		delaySteps: Math.floor(obj.delay/JSTween.updateRate), //amount of steps to delay the animation (JS)
+
+        curDel: false,                                //whether or not the tween is currently affected by a delay
+        curDelStep: 0,                                //current step the delay timer is on
+
+        t: 0,                                         //variable used in penners equations, current step of the tween
+
+		onComplete: obj.onComplete,                   //oncomplete function
+		onCompleteParams: obj.onCompleteParams        //oncomplete function parameters
 	}
 	if(tweenObj.delaySteps > 0){
 		tweenObj.curDel = true;
 	}
-
-
-
 
 	return tweenObj;
 }
@@ -148,14 +160,14 @@ superTween.fn.setupTween = function(elem, time, obj){
 superTween.fn.getAttr = function(elem, obj){
 	var returnVar = [];
 
-	for (var i=0;i<glob.availAttr.length;i++){
+	for (var i=0;i<superTween.availAttr.length;i++){
 
-		var curSearch = glob.availAttr[i];
+		var curSearch = superTween.availAttr[i];
 
 		if(obj[curSearch] !== null && obj[curSearch] !== undefined ){
 
 			var newObj = {}
-			   	newObj.attr = glob.availAttr[i];
+			   	newObj.attr = superTween.availAttr[i];
 			   	newObj.b = superTween.fn.getPos(elem, newObj.attr, obj[newObj.attr]);
 			   	newObj.c = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], newObj.b, elem);
 
@@ -164,6 +176,13 @@ superTween.fn.getAttr = function(elem, obj){
 	}
 	return returnVar;
 }
+
+/*
+ * Gets the current position of whatever attribute is being changed
+ *  @param elem: element under question
+ *  @param attr: attribute under question
+ *  @param backupVal: in case of an unsure value, what to 'default' it with
+ */
 superTween.fn.getPos = function(elem, attr, backupVal){
 
 	switch(attr){
@@ -235,6 +254,14 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 			break
 	}
 }
+
+/*
+ * returns the amount of change an element will undergo in the specified attribute
+ *  @param attr: attribute under question
+ *  @param targ: the end value of the tween
+ *  @param orig: the origional attribute value
+ *  @param elem: element under question
+ */
 superTween.fn.getTarg = function(attr, targ, orig, elem){
 	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
 		return targ - orig;
@@ -248,7 +275,7 @@ superTween.fn.getTarg = function(attr, targ, orig, elem){
 
 
 /*
- * Functions used for JS tweens
+ * The 'onUpdate' loop run if it it a JS tween
 */
 JSTween.tweenLoop = function(){
     var anims = JSTween.curAnims;
@@ -294,12 +321,19 @@ JSTween.tweenLoop = function(){
 		}
 	}
 	if(anims.length != 0){
-		glob.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+        JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
 	} else {
-		clearTimeout(glob.loopTimer);
-		glob.loopTimer = null;
+		clearTimeout(JSTween.loopTimer);
+        JSTween.loopTimer = null;
 	}
 }
+
+/*
+ * Sets the new value for a given attribute
+ *  @param elem: element under question
+ *  @param obj: object containing tween vars
+ *  @param val: value to change attribute to
+*/
 JSTween.setPos = function(elem, obj, val){
 	switch(obj.attr){
 		case 'x' :

@@ -1,22 +1,19 @@
-var CSSTween = {},
-	tweenStyle = null,
-	newSheet = null,
-	vendorPrefixs = ["webkit", "moz"],
-	stCounter = 0
-
 /*
-			TO DO
-		- figure out that damn transform origin z-origin bug
-		- strange rotation but difference between CSS and JS
-		- JS override
-*/
+ * Super natural's micro Tween Engine CSS Plugin
+ * http://www.wearesupernatural.com/
+ *
+ */
 
-CSSTween.counter = 0;
-CSSTween.curAnims = {};
+var CSSTween = {
+	counter: 0,
+	curAnims: {},
+	vendorPrefixs: ["webkit", "moz"],
+}
 
 
 /*
  * main controller
+ * 	@param obj: the tween object created in superTween.js
 */
 CSSTween.applyCSSTransition = function(obj){
 
@@ -60,9 +57,6 @@ CSSTween.applyCSSTransition = function(obj){
 	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
 	CSSTween.tweenStyles.transitionProperty = transitProp;
 
-
-	//console.log(obj.ease)
-
 	if(obj.rawDelay){
 		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
 	} else {
@@ -99,6 +93,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 /*
  * fires on transition complete, removes anim from array and fires any onComplete Events
+ * 	@param e: transition event
 */
 CSSTween.completeHandler = function(e){
 
@@ -127,11 +122,16 @@ CSSTween.completeHandler = function(e){
 
 /*
  * returns the appropriate value and suffix for each element passed in
+ * 	@param parObj: the tween object created in superTween.js
+ * 	@param unit: the attribute in question
 */
 CSSTween.naming = function(parObj, unit){
 
 	obj = parObj.attr[unit]
 
+	/*
+	 * r = object to return
+	*/
 	var r = {
 		cssVar: obj.attr,
 		value: parObj.rawObj[obj.attr],
@@ -170,36 +170,25 @@ CSSTween.naming = function(parObj, unit){
 
 
 /*
- * returns the appropriate CSS name for values
-*/
-CSSTween.namify = function(name){
-	switch(name){
-		case "x": 			return "left";			break;
-		case "y": 			return "top";			break;
-		default:
-			return name;
-			break;
-	}
-}
-
-
-/*
  * adds vendor-prefixed variables to an object
+ * 	@param whatAttrArr: an array of attributes to vendorify
+ * 	@param whatObj: what object to put the newly prefixed variables into
 */
 CSSTween.vendorPrefix = function(whatAttrArr, whatObj){
 	for(var i = 0; i < whatAttrArr.length; i++){
-		for(var k = 0; k < vendorPrefixs.length; k++){
-			var newVar = vendorPrefixs[k]+whatAttrArr[i].charAt(0).toUpperCase() + whatAttrArr[i].slice(1);
+		for(var k = 0; k < CSSTween.vendorPrefixs.length; k++){
+			var newVar = CSSTween.vendorPrefixs[k]+whatAttrArr[i].charAt(0).toUpperCase() + whatAttrArr[i].slice(1);
 			whatObj[newVar] = CSSTween.tweenStyles[whatAttrArr[i]];
 		}
 	}
 }
 
 
-/*
- * CSS EASES
-*/
-
+/******************
+ *
+ * CSS EASES (only uncomment the ones you use)
+ *
+********************/
 CSSEase = {
 	Expo : {
 	//	easeIn: 'cubic-bezier(0.95, 0.05, 0.795, 0.035)',
