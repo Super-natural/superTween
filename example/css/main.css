@@ -1,6 +1,7 @@
 body {
 	margin: 0;
 	padding: 0;
+	background-color: #f2f2f2;
 }
 
 
@@ -16,24 +17,31 @@ body {
 	position: absolute;
 	left:100px;
 	opacity: 1;
-	filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);
+	/*filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);*/
+	transform-origin: top left;
+	mozTransform-origin: top left;
+	webkitTransform-origin: top left;
+	color: white;
 }
 
 #elemW{
-	background-color: orange;
+	background-color: red;
 	top:100px;
 	opacity: 1;
 }
 #elemX{
 	background-color: blue;
-	top:150px;
+	top:200px;
 }
 #elemY{
-	background-color: red;
-	top:200px;
+	background-color: green;
+	top:300px;
 }
 
 #elemZ{
-	background-color: green;
-	top:250px;
+	background-color: black;
+	top: 0;
+	height: 100%;
+	width: 1px;
+	left:150px;
 }

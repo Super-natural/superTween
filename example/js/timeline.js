@@ -17,85 +17,49 @@ App.timeline.init = function(){
 	App.dom.elemW = document.getElementById('elemW');
 	App.dom.elemX = document.getElementById('elemX');
 	App.dom.elemY = document.getElementById('elemY');
-	App.dom.elemZ = document.getElementById('elemZ')
 
-	App.utils.goTo(1, 0);
+	App.utils.goTo(0, 0);
 
 }
 
 App.timeline.doStep = function(whatStep){
+	App.log("Step: "+whatStep)
 	switch(whatStep){
 		case 0:
-			console.log("step 0")
-			App.superTween.to(App.dom.elemW, 1, {rotate: 45, ease: Linear.easeNone});
-			App.utils.goTo(2, 2500);
-			break;
-
-		case 10:
-			console.log("step 10")
-			App.superTween.to(App.dom.elemW, 1, {rotate: 0, ease: Linear.easeNone});
-			App.utils.goTo(0, 2500);
+			App.superTween.to(App.dom.elemW, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, rotate: 45, opacity: 0.5, ease: 'Linear.easeNone'});
+			App.superTween.to(App.dom.elemX, 1, {x: 300, y:400, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 1});
+			App.superTween.to(App.dom.elemY, 1, {x: 300, y:500, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 2,
+													onComplete: App.utils.goTo,
+													onCompleteParams: [1]});
 			break;
 
 		case 1:
-			App.timeline.boxAnim(1, App.dom.elemW);
-			App.utils.goTo(2, 2500);
+			App.superTween.to(App.dom.elemW, 1, {x: 100, y:300, scaleY: 1.5, scaleX: 0.5, rotate: 200, opacity: 1, ease: 'Sine.easeIn'});
+			App.superTween.to(App.dom.elemX, 1, {x: 100, y:400, scaleY: 1.5, scaleX: 0.5, rotate: 200, opacity: 1, ease: 'Sine.easeOut', delay: 1});
+			App.superTween.to(App.dom.elemY, 1, {x: 100, y:500, scaleY: 1.5, scaleX: 0.5, rotate: 200, opacity: 1, ease: 'Sine.easeInOut', delay: 2,
+													onComplete: App.utils.goTo,
+													onCompleteParams: [2]});
 			break;
 
 		case 2:
-			App.timeline.boxAnim(1, App.dom.elemX);
-			App.utils.goTo(3, 2500);
+			App.superTween.to(App.dom.elemW, 1, {x: 300, y:100, scaleY: 0.5, scaleX: 2, rotate: 180,	ease: 'Back.easeOut'});
+			App.superTween.to(App.dom.elemX, 1, {x: 300, y:200, scaleY: 0.5, scaleX: 2, rotate: 180,	ease: 'Back.easeOut', delay: 1});
+			App.superTween.to(App.dom.elemY, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, rotate: 180,	ease: 'Back.easeOut', delay: 2,
+													onComplete: App.utils.goTo,
+													onCompleteParams: [3]});
 			break;
 
 		case 3:
-			App.timeline.boxAnim(1, App.dom.elemY);
-			App.utils.goTo(4, 2500);
+			App.superTween.to(App.dom.elemW, 1, {x: 500, y:500, scaleY: 1, scaleX: 1, rotate: 100, ease: 'Sine.easeIn'});
+			App.superTween.to(App.dom.elemX, 1, {x: 500, y:600, scaleY: 1, scaleX: 1, rotate: 100, ease: 'Sine.easeOut',	delay: 1});
+			App.superTween.to(App.dom.elemY, 1, {x: 500, y:700, scaleY: 1, scaleX: 1, rotate: 100, ease: 'Sine.easeInOut', delay: 2,
+													onComplete: App.utils.goTo,
+													onCompleteParams: [0]});
 			break;
 
-		case 4:
-			App.timeline.boxAnim(1, App.dom.elemZ);
-			App.utils.goTo(5, 2500);
-			break;
 	}
 }
 
-App.timeline.boxAnim = function(whatStep, elem){
-	switch(whatStep){
-		case 1 :
-			App.superTween.to(elem, 1, {x: 600, y: 60, scaleX: 0.2, scaleY: 0.5,
-						    		   delay: .5,
-									   ease: Elastic.easeInOut,
-									   onComplete: App.timeline.boxAnim,
-									   onCompleteParams: [2, elem]
-									});
-			break;
-
-		case 2 :
-			App.superTween.to(elem, 3, {x: 500, y: 700, opacity: 0, scaleX: 0.7, scaleY: 0.3, rotate: 90,
-									   ease: Sine.easeInOut,
-									   onComplete: App.timeline.boxAnim,
-									   onCompleteParams: [3, elem]
-									});
-			break;
-
-		case 3 :
-			App.superTween.to(elem, 2, {y: 50, x: 350, opacity: 1, scaleX: 1.5, scaleY: 0.8, rotate: 45,
-									   ease: Back.easeOut,
-									   onComplete: App.timeline.boxAnim,
-									   onCompleteParams: [4, elem]
-									});
-			break;
-
-		case 4 :
-			App.superTween.to(elem, 3, {x: 45, y: 450, scaleX: 1, scaleY: 1,
-									   delay: 1,
-									   ease: Sine.easeInOut,
-									   onComplete: App.timeline.boxAnim,
-									   onCompleteParams: [1, elem]
-									});
-			break;
-		}
-}
 
 App.utils.goTo = function(whatStep, timeout){
 	setTimeout(function(){
