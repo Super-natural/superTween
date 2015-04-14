@@ -36,10 +36,11 @@ superTween.init = function(){
     elem = document.createElement('div');
 
     if( elem.style.transition !== undefined ) { superTween.useCSS = true; }
+
     if( superTween.useCSS === false ) {
-        feat = "transition";
-        featurenameCapital = feat.charAt(0).toUpperCase() + feat.substr(1);
+        featurenameCapital = "Transition";
         for( var i = 0; i < domPrefixes.length; i++ ) {
+        //    console.dir(elem.style[domPrefixes[i] + featurenameCapital ]);
             if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
                 superTween.useCSS = true;
               break;
@@ -80,7 +81,7 @@ superTween.to = function(elem, time, obj){
 
     //If the CSS plugin is available as well as supported by browser, use CSS
     if(superTween.useCSS && CSSTween){
-        console.log(obj.useJS)
+
         CSSTween.applyCSSTransition(newTween);
 
     } else {
@@ -359,7 +360,7 @@ JSTween.setPos = function(elem, obj, val){
 			//IE8 Opacity fix
 			if ('filters' in elem){
                 if(elem.filters.item){
-				    elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
+				    //elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
 			    }
             }
 			break;

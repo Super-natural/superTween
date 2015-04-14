@@ -11,6 +11,7 @@ module.exports = function(grunt) {
 
 		srcJS = [	// All JS to include in final file
 					'src/superTween.js',
+					'src/superTween_CSSPlugin.js',
 				],
 		buildProcess = [	// Processes to inititate on default Grunt
 					'clean:build', 			// Clean working directory

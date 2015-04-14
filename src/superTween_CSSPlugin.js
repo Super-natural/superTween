@@ -7,7 +7,7 @@
 var CSSTween = {
 	counter: 0,
 	curAnims: {},
-	vendorPrefixs: ["webkit", "moz"],
+	vendorPrefixs: ["webkit", "Moz"],
 }
 
 
@@ -16,6 +16,7 @@ var CSSTween = {
  * 	@param obj: the tween object created in superTween.js
 */
 CSSTween.applyCSSTransition = function(obj){
+
 
 	CSSTween.curAnims["anim"+CSSTween.counter] = obj;
 	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
@@ -75,6 +76,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 	//Apply the styles to the element
 	for(var prop in CSSTween.tweenStyles){
+
 		if(!CSSTween.tweenStyles[prop]){
 			CSSTween.tweenStyles[prop] = null;
 		}
@@ -82,6 +84,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
 	}
+
 
 	//listen for transition complete && setup backup timer
 	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );

@@ -1,4 +1,4 @@
-/*! SuperTween version 0.2.1. Created 30-03-2015 */
+/*! SuperTween version 0.3.0. Created 14-04-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -6,14 +6,52 @@
  * currently supports down to IE8
  */
 
-//Globals
-var glob = {
-  	updateRate: 30,
-  	loopTimer: null,
-  	availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
+ /*
+ 			TO DO
+ 		- figure out that damn transform origin z-origin bug
+ 		- strange rotation but difference between CSS and JS
+ 		- JS override
+ */
+
+
+ var superTween = {
+     fn: {},
+     useCSS: false,
+     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
+};
+
+
+//Variables for a javascript tween
+var JSTween = {
+    updateRate: 30,
+    loopTimer: null,
+    curAnims: [],
 }
-var anims = [];
-var superTween = {}
+
+
+/*
+ * Runs on script load, determines whether to use CSS of JS transitions
+*/
+superTween.init = function(){
+    domPrefixes = 'Webkit Moz ms O'.split(' ');
+    elem = document.createElement('div');
+
+    if( elem.style.transition !== undefined ) { superTween.useCSS = true; }
+    if( superTween.useCSS === false ) {
+        feat = "transition";
+        featurenameCapital = feat.charAt(0).toUpperCase() + feat.substr(1);
+        for( var i = 0; i < domPrefixes.length; i++ ) {
+            if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
+                superTween.useCSS = true;
+              break;
+            }
+        }
+    }
+}
+
+
+
+
 
 /* @param elem: element to be tweened
  * @param time: length of animation
@@ -24,92 +62,91 @@ var superTween = {}
  *			ease: ease to use for tween
 */
 superTween.to = function(elem, time, obj){
+    /*
+    if(obj.useJS){
+        superTween.useCSS = false;
+    }
+    */
 
 	time = time*1000;
 	obj.delay = obj.delay*1000;
+    var newTween = superTween.fn.setupTween(elem, time, obj);
 
-	anims.push(setupTween(elem, time, obj));
 
-	if(!glob.loopTimer){
-		glob.loopTimer = setTimeout(tweenLoop, glob.updateRate);
-	}
-}
+/*
+   elem.style.msTransformOrigin = '0';
+   elem.style.webkitTransformOrigin = '0';
+   elem.style.transformOrigin = '0';
+*/
 
-superTween.killAll = function(){
-    clearTimeout(glob.loopTimer);
-    anims = [];
+    //If the CSS plugin is available as well as supported by browser, use CSS
+    if(superTween.useCSS && CSSTween){
+        console.log(obj.useJS)
+        CSSTween.applyCSSTransition(newTween);
+
+    } else {
+
+        JSTween.curAnims.push(newTween);
+
+    	if(!JSTween.loopTimer){
+            JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+    	}
+    }
 }
 
 /*
- * Triggered every increment
+ * Kills all active Tweens
 */
-function tweenLoop(){
-	for (i = 0; i < anims.length; i++){
-		if(!anims[i].curDel){
-			for(var j = 0; j < anims[i].attr.length; j++){
+superTween.killAll = function(){
+    clearTimeout(JSTween.loopTimer);
+    JSTween.curAnims = [];
 
-				var passObj = {
-					t:	anims[i].t,
-					d:	anims[i].d,
-					b: 	anims[i].attr[j].b,
-					c: 	anims[i].attr[j].c
-				}
-				var newVal = anims[i].ease(passObj);
-
-				setPos(anims[i].elem, anims[i].attr[j], newVal);
-			}
-
-			anims[i].t ++;
-
-			//if reached the end then remove
-			if (anims[i].t > anims[i].d){
-
-				if(anims[i].onComplete){
-					var func = anims[i].onComplete;
-					var vars = anims[i].onCompleteParams;
-				}
-				anims.splice(i, 1);
-
-				if(func){
-					func.apply(this, vars);
-				}
-			}
-		} else {
-			//There is a delay
-			anims[i].curDelStep ++;
-
-			if (anims[i].curDelStep > anims[i].delaySteps){
-				anims[i].curDel = false;
-			}
-
-		}
-	}
-	if(anims.length != 0){
-		glob.loopTimer = setTimeout(tweenLoop, glob.updateRate);
-	} else {
-		clearTimeout(glob.loopTimer);
-		glob.loopTimer = null;
-		//App.log("All animation complete")
-	}
+    for (var anim in CSSTween.curAnims){
+        for(var prop in CSSTween.tweenStyles){
+            CSSTween.curAnims[anim].elem.style[prop] = null;
+        }
+    }
 }
+
 
 /*
  * Initialises a tween and does the math to work out what does what
+ * @param elem: element the tween is acting upon
+ * @param time: length of time of tween
+ * @param obj: object containing all the tween variables
 */
-function setupTween(elem, time, obj){
-	if(!obj.ease){obj.ease = Sine.easeInOut}
+superTween.fn.setupTween = function(elem, time, obj){
+	if(!obj.ease){obj.ease = 'Sine.easeInOut'}
+
+    var easeEx = obj.ease.split(".");
+    var chosenEase = "";
+
+    if(superTween.useCSS){
+        chosenEase = CSSEase[easeEx[0]][easeEx[1]]
+    } else{
+        chosenEase = JSEase[easeEx[0]][easeEx[1]]
+    }
+
 
 	var tweenObj = {
-		attr: getAttr(elem, obj),
-		d: Math.floor(time/glob.updateRate),
-		delaySteps: Math.floor(obj.delay/glob.updateRate),
-		curDel: false,
-		t: 0,
-		curDelStep: 0,
-		elem: elem,
-		ease: obj.ease,
-		onComplete: obj.onComplete,
-		onCompleteParams: obj.onCompleteParams
+		attr: superTween.fn.getAttr(elem, obj),       //attribute(s) changing for the element
+        elem: elem,                                   //element under question
+		ease: chosenEase,                             //ease to use for the tween
+
+        rawObj: obj,                                  //the raw object called in the timeline (for CSS)
+        rawTime: time,                                //the raw time (for CSS)
+        rawDelay:obj.delay,                           //raw delay amt, (for CSS)
+
+        d: Math.floor(time/JSTween.updateRate),       //variable used in penners equations within the JS eases, duration in steps
+		delaySteps: Math.floor(obj.delay/JSTween.updateRate), //amount of steps to delay the animation (JS)
+
+        curDel: false,                                //whether or not the tween is currently affected by a delay
+        curDelStep: 0,                                //current step the delay timer is on
+
+        t: 0,                                         //variable used in penners equations, current step of the tween
+
+		onComplete: obj.onComplete,                   //oncomplete function
+		onCompleteParams: obj.onCompleteParams        //oncomplete function parameters
 	}
 	if(tweenObj.delaySteps > 0){
 		tweenObj.curDel = true;
@@ -119,28 +156,35 @@ function setupTween(elem, time, obj){
 }
 
 /*
- * Getting and setting the variables
+ * Getting and setting the variables for a new Tween
 */
-function getAttr(elem, obj){
+superTween.fn.getAttr = function(elem, obj){
 	var returnVar = [];
 
-	for (var i=0;i<glob.availAttr.length;i++){
+	for (var i=0;i<superTween.availAttr.length;i++){
 
-		var curSearch = glob.availAttr[i];
+		var curSearch = superTween.availAttr[i];
 
 		if(obj[curSearch] !== null && obj[curSearch] !== undefined ){
 
 			var newObj = {}
-			   	newObj.attr = glob.availAttr[i];
-			   	newObj.b = getPos(elem, newObj.attr, obj[newObj.attr]);
-			   	newObj.c = getTarg(newObj.attr, obj[newObj.attr], newObj.b, elem);
+			   	newObj.attr = superTween.availAttr[i];
+			   	newObj.b = superTween.fn.getPos(elem, newObj.attr, obj[newObj.attr]);
+			   	newObj.c = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], newObj.b, elem);
 
 			returnVar.push(newObj);
 		}
 	}
 	return returnVar;
 }
-function getPos(elem, attr, backupVal){
+
+/*
+ * Gets the current position of whatever attribute is being changed
+ *  @param elem: element under question
+ *  @param attr: attribute under question
+ *  @param backupVal: in case of an unsure value, what to 'default' it with
+ */
+superTween.fn.getPos = function(elem, attr, backupVal){
 
 	switch(attr){
 		case 'x' :
@@ -211,7 +255,87 @@ function getPos(elem, attr, backupVal){
 			break
 	}
 }
-function setPos(elem, obj, val){
+
+/*
+ * returns the amount of change an element will undergo in the specified attribute
+ *  @param attr: attribute under question
+ *  @param targ: the end value of the tween
+ *  @param orig: the origional attribute value
+ *  @param elem: element under question
+ */
+superTween.fn.getTarg = function(attr, targ, orig, elem){
+	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
+		return targ - orig;
+	} else if(attr == 'scaleX'){
+		return ((targ * elem.getAttribute('data-startW')-orig))
+	} else if (attr == 'scaleY'){
+		return ((targ * elem.getAttribute('data-startH')-orig))
+
+	}
+}
+
+
+/*
+ * The 'onUpdate' loop run if it it a JS tween
+*/
+JSTween.tweenLoop = function(){
+    var anims = JSTween.curAnims;
+	for (i = 0; i < anims.length; i++){
+		if(!anims[i].curDel){
+			for(var j = 0; j < anims[i].attr.length; j++){
+
+				var passObj = {
+					t:	anims[i].t,
+					d:	anims[i].d,
+					b: 	anims[i].attr[j].b,
+					c: 	anims[i].attr[j].c //- anims[i].attr[j].b
+				}
+
+				var newVal = anims[i].ease(passObj);
+
+                JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
+			}
+
+			anims[i].t ++;
+
+			//if reached the end then remove
+			if (anims[i].t > anims[i].d){
+
+				if(anims[i].onComplete){
+					var func = anims[i].onComplete;
+					var vars = anims[i].onCompleteParams;
+				}
+				anims.splice(i, 1);
+
+				if(func){
+					func.apply(this, vars);
+				}
+			}
+		} else {
+			//There is a delay
+			anims[i].curDelStep ++;
+
+			if (anims[i].curDelStep > anims[i].delaySteps){
+				anims[i].curDel = false;
+			}
+
+		}
+	}
+	if(anims.length != 0){
+        JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+	} else {
+		clearTimeout(JSTween.loopTimer);
+        JSTween.loopTimer = null;
+	}
+}
+
+/*
+ * Sets the new value for a given attribute
+ *  @param elem: element under question
+ *  @param obj: object containing tween vars
+ *  @param val: value to change attribute to
+*/
+JSTween.setPos = function(elem, obj, val){
 	switch(obj.attr){
 		case 'x' :
 			elem.style.left = val + "px";
@@ -223,6 +347,7 @@ function setPos(elem, obj, val){
 
 		case 'scaleX' :
 			elem.style.width = val + "px";
+
 			break;
 
 		case 'scaleY' :
@@ -249,17 +374,9 @@ function setPos(elem, obj, val){
 			break;
 	}
 }
-function getTarg(attr, targ, orig, elem){
-	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
-		return targ - orig;
-	} else if(attr == 'scaleX'){
-		return (targ * elem.getAttribute('data-startW')) - orig;
-	} else if (attr == 'scaleY'){
-		return (targ * elem.getAttribute('data-startH')) - orig;
-	}
-}
 
 
+superTween.init();
 
 
 /******************
@@ -271,170 +388,409 @@ function getTarg(attr, targ, orig, elem){
  *  c = change in position/state
  *
 ********************/
-var Expo = {
-/*	easeIn: function(ob) {
-	   			return ob.c * Math.pow(2, 10 * (ob.t / ob.d - 1)) + ob.b;
-			},			//*/
-/*	easeOut: function(ob) {
-	   			return ob.c * (-Math.pow(2, -10 * ob.t / ob.d) + 1) + ob.b;
-			},		//*/
-/*	easeInOut: function(ob) {
-		if ((ob.t /= ob.d / 2) < 1) {
-	        return ob.c / 2 * Math.pow(2, 10 * (ob.t - 1)) + ob.b;
-	    }
-	    return ob.c / 2 * (-Math.pow(2, -10 * --ob.t) + 2) + ob.b;
+var JSEase = {
+    Expo: {
+    /*	easeIn: function(ob) {
+    	   			return ob.c * Math.pow(2, 10 * (ob.t / ob.d - 1)) + ob.b;
+    			},			//*/
+    /*	easeOut: function(ob) {
+    	   			return ob.c * (-Math.pow(2, -10 * ob.t / ob.d) + 1) + ob.b;
+    			},		//*/
+    /*	easeInOut: function(ob) {
+    		if ((ob.t /= ob.d / 2) < 1) {
+    	        return ob.c / 2 * Math.pow(2, 10 * (ob.t - 1)) + ob.b;
+    	    }
+    	    return ob.c / 2 * (-Math.pow(2, -10 * --ob.t) + 2) + ob.b;
 
-	},		// !NONFUNCTIONAL */
-}
-var Quint = {
-/*	easeIn: function(ob) {
-	    		return ob.c * Math.pow (ob.t / ob.d, 5) + ob.b;
-			},			//*/
-/*	easeOut: function(ob) {
-	    		return ob.c * (Math.pow(ob.t / ob.d - 1, 5) + 1) + ob.b;
-			},		//*/
-/*	easeInOut: function(ob) {
-		if ((ob.t /= ob.d / 2) < 1) {
-	        return ob.c / 2 * Math.pow(ob.t, 5) + ob.b;
-	    }
-	    return ob.c / 2 * (Math.pow(ob.t - 2, 5) + 2) + ob.b;
-	},		// !NONFUNCTIONAL */
-}
-var Quart = {
-/*	easeIn: function(ob) {
-	    		return ob.c * Math.pow (ob.t / ob.d, 4) + ob.b;
-			},			//*/
-/*	easeOut: function(ob) {
-	    		return -ob.c * (Math.pow(ob.t / ob.d - 1, 4) - 1) + ob.b;
-			},		//*/
-/*	easeInOut: function(ob) {
-		if ((ob.t /= ob.d / 2) < 1) {
-	        return ob.c / 2 * Math.pow(ob.t, 4) + ob.b;
-	    }
-	    return -ob.c / 2 * (Math.pow(ob.t - 2, 4) - 2) + ob.b;
-	},		// !NONFUNCTIONAL */
-}
-var Cubic = {
-/*	easeIn: function(ob) {
-				return ob.c * Math.pow(ob.t / ob.d, 3) + ob.b;
-			},			//*/
-/*	easeOut: function(ob) {
-				return ob.c * (Math.pow(ob.t / ob.d - 1, 3) + 1) + ob.b;
-			},		//*/
-/*	easeInOut: function(ob) {
-		if ((ob.t /= ob.d / 2) < 1) {
-	        return ob.c / 2 * Math.pow(ob.t, 3) + ob.b;
-	    }
-	    return ob.c / 2 * (Math.pow(ob.t - 2, 3) + 2) + ob.b;
-	},		// !NONFUNCTIONAL */
-}
-var Linear = {
-/*	easeNone: function(ob) {
-			    return ob.c * ob.t / ob.d + ob.b;
-			},		//*/
-}
-var Sine = {
-/*	easeIn: function(ob) {
-			    return ob.c * (1 - Math.cos(ob.t / ob.d * (Math.PI / 2))) + ob.b;
-			},			//*/
-/*	easeOut: function(ob) {
-			    return ob.c * Math.sin(ob.t / ob.d * (Math.PI / 2)) + ob.b;
-			},		//*/
-	easeInOut: function(ob) {
-			    return ob.c / 2 * (1 - Math.cos(Math.PI * ob.t / ob.d)) + ob.b;
-			},		//*/
-}
-var Elastic = {
-/*	easeOut: function (ob) {
-				var a = 1;
-				var p = 15;
-				if (ob.t==0) return ob.b;  if ((ob.t/=ob.d)==1) return ob.b+ob.c;  if (!p) p=ob.d*.3;
-				if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
-				else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
-				return a*Math.pow(2,-10*ob.t) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p ) + ob.c + ob.b;
-			},		//*/
-/*	easeIn: function (ob) {
-		var a = 1;
-		var p = 15;
-		if (ob.t==0) return ob.b;  if ((ob.t/=ob.d)==1) return ob.b+ob.c;  if (!p) p=ob.d*.3;
-		if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
-		else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
-		return -(a*Math.pow(2,10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )) + ob.b;
-	},		//*/
-	easeInOut: function (ob) {
-		var a = 1;
-		var p = 15;
-		if (ob.t==0) return ob.b;  if ((ob.t/=ob.d/2)==2) return ob.b+ob.c;  if (!p) p=ob.d*(.3*1.5);
-		if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
-		else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
-		if (ob.t < 1) return -.5*(a*Math.pow(2,10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )) + ob.b;
-		return a*Math.pow(2,-10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )*.5 + ob.c + ob.b;
-	}		//*/
-}
-var Back = {
-	easeOut: function (ob, s) {
-				if (s == undefined) s = 1.70158;
-				return ob.c*((ob.t=ob.t/ob.d-1)*ob.t*((s+1)*ob.t + s) + 1) + ob.b;
-			},	//*/
-/*	easeIn: function (ob, s) {
-				if (s == undefined) s = 1.70158;
-				return ob.c*(ob.t/=ob.d)*ob.t*((s+1)*ob.t - s) + ob.b;
-			},		//*/
-/*	easeInOut: function (ob, s) {
-				if (s == undefined) s = 1.70158;
-				if ((ob.t/=ob.d/2) < 1) return ob.c/2*(ob.t*ob.t*(((s*=(1.525))+1)*ob.t - s)) + ob.b;
-				return ob.c/2*((ob.t-=2)*ob.t*(((s*=(1.525))+1)*ob.t + s) + 2) + ob.b;
-			}	//*/
-}
-var Bounce = {
-/*	easeOut: function (ob) {
-						if ((ob.t/=ob.d) < (1/2.75)) {
-							return ob.c*(7.5625*ob.t*ob.t) + ob.t;
-						} else if (ob.t < (2/2.75)) {
-							return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.t;
-						} else if (ob.t < (2.5/2.75)) {
-							return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.t;
-						} else {
-							return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.t;
-						}
-				},		// !NONFUNCTIONAL */
-/*	easeInOut: function (ob) {
-						var newVar2 = {t: ob.t*2, b: 0, c: ob.c, d: ob.d}
-						if (ob.t < ob.d/2) return Bounce.easeOut(newVar2) * .5 + ob.t;
-						var newVar = {t: ob.t*2-ob.d, b: 0, c: ob.c, d: ob.d};
-						return Bounce.easeOut(newVar) * .5 + ob.c*.5 + ob.t;
-				},		// !NONFUNCTIONAL */
-/*	easeIn: function (ob) {
-						var newVar = {t: ob.t-ob.t, b: 0, c: ob.c, d: ob.d}
-						return ob.c - Bounce.easeOut(newVar) + ob.t;
-				},		// !NONFUNCTIONAL */
-}	// !NONFUNCTIONAL
-var Quad = {
-/*	easeIn: function(ob) {
-			    return ob.c * (ob.t /= ob.d) * ob.t + ob.b;
-			}			// !NONFUNCTIONAL */
-/*	easeOut: function(ob) {
-			    return -ob.c * (ob.t /= ob.d) * (ob.t - 2) + ob.b;
-			}			// !NONFUNCTIONAL */
-/*	easeInOut: function(ob) {
-			if ((ob.t /= ob.d / 2) < 1) {
-		        return ob.c / 2 * ob.t * ob.t + ob.b;
-		    }
-			return -ob.c / 2 * ((--ob.t) * (ob.t - 2) - 1) + ob.b;
-			}		// !NONFUNCTIONAL */
-}	// !NONFUNCTIONAL
-var Circ = {
-/*	easeIn: function(ob) {
-			    return ob.c * (1 - Math.sqrt(1 - (ob.t /= ob.d) * ob.t)) + ob.b;
-			}			// !NONFUNCTIONAL */
-/*	easeOut: function(ob) {
-			    return ob.c * Math.sqrt(1 - (ob.t = ob.t / ob.d - 1) * ob.t) + ob.b;
-			}			// !NONFUNCTIONAL */
-/*	easeInOut: function(ob) {
-				if ((ob.t /= ob.d / 2) < 1) {
-			        return ob.c / 2 * (1 - Math.sqrt(1 - ob.t * ob.t)) + ob.b;
-			    }
-			    return ob.c / 2 * (Math.sqrt(1 - (ob.t -= 2) * ob.t) + 1) + ob.b;
+    	},		// !NONFUNCTIONAL */
+    },
+    Quint: {
+    /*	easeIn: function(ob) {
+    	    		return ob.c * Math.pow (ob.t / ob.d, 5) + ob.b;
+    			},			//*/
+    /*	easeOut: function(ob) {
+    	    		return ob.c * (Math.pow(ob.t / ob.d - 1, 5) + 1) + ob.b;
+    			},		//*/
+    /*	easeInOut: function(ob) {
+    		if ((ob.t /= ob.d / 2) < 1) {
+    	        return ob.c / 2 * Math.pow(ob.t, 5) + ob.b;
+    	    }
+    	    return ob.c / 2 * (Math.pow(ob.t - 2, 5) + 2) + ob.b;
+    	},		// !NONFUNCTIONAL */
+    },
+    Quart: {
+    /*	easeIn: function(ob) {
+    	    		return ob.c * Math.pow (ob.t / ob.d, 4) + ob.b;
+    			},			//*/
+    /*	easeOut: function(ob) {
+    	    		return -ob.c * (Math.pow(ob.t / ob.d - 1, 4) - 1) + ob.b;
+    			},		//*/
+    /*	easeInOut: function(ob) {
+    		if ((ob.t /= ob.d / 2) < 1) {
+    	        return ob.c / 2 * Math.pow(ob.t, 4) + ob.b;
+    	    }
+    	    return -ob.c / 2 * (Math.pow(ob.t - 2, 4) - 2) + ob.b;
+    	},		// !NONFUNCTIONAL */
+    },
+    Cubic: {
+    /*	easeIn: function(ob) {
+    				return ob.c * Math.pow(ob.t / ob.d, 3) + ob.b;
+    			},			//*/
+    /*	easeOut: function(ob) {
+    				return ob.c * (Math.pow(ob.t / ob.d - 1, 3) + 1) + ob.b;
+    			},		//*/
+    /*	easeInOut: function(ob) {
+    		if ((ob.t /= ob.d / 2) < 1) {
+    	        return ob.c / 2 * Math.pow(ob.t, 3) + ob.b;
+    	    }
+    	    return ob.c / 2 * (Math.pow(ob.t - 2, 3) + 2) + ob.b;
+    	},		// !NONFUNCTIONAL */
+    },
+    Linear: {
+    	easeNone: function(ob) {
+    			    return ob.c * ob.t / ob.d + ob.b;
+    			},		//*/
+    },
+    Sine: {
+    	easeIn: function(ob) {
+    			    return ob.c * (1 - Math.cos(ob.t / ob.d * (Math.PI / 2))) + ob.b;
+    			},			//*/
+    	easeOut: function(ob) {
+    			    return ob.c * Math.sin(ob.t / ob.d * (Math.PI / 2)) + ob.b;
+    			},		//*/
+    	easeInOut: function(ob) {
+    			    return ob.c / 2 * (1 - Math.cos(Math.PI * ob.t / ob.d)) + ob.b;
+    			},		//*/
+    },
+    Elastic: {
+    /*	easeOut: function (ob) {
+    				var a = 1;
+    				var p = 15;
+    				if (ob.t==0) return ob.b;  if ((ob.t/=ob.d)==1) return ob.b+ob.c;  if (!p) p=ob.d*.3;
+    				if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
+    				else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
+    				return a*Math.pow(2,-10*ob.t) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p ) + ob.c + ob.b;
+    			},		//*/
+    /*	easeIn: function (ob) {
+    		var a = 1;
+    		var p = 15;
+    		if (ob.t==0) return ob.b;  if ((ob.t/=ob.d)==1) return ob.b+ob.c;  if (!p) p=ob.d*.3;
+    		if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
+    		else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
+    		return -(a*Math.pow(2,10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )) + ob.b;
+    	},		//*/
+    /*	easeInOut: function (ob) {
+    		var a = 1;
+    		var p = 15;
+    		if (ob.t==0) return ob.b;  if ((ob.t/=ob.d/2)==2) return ob.b+ob.c;  if (!p) p=ob.d*(.3*1.5);
+    		if (a < Math.abs(ob.c)) { a=ob.c; var s=p/4; }
+    		else var s = p/(2*Math.PI) * Math.asin (ob.c/a);
+    		if (ob.t < 1) return -.5*(a*Math.pow(2,10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )) + ob.b;
+    		return a*Math.pow(2,-10*(ob.t-=1)) * Math.sin( (ob.t*ob.d-s)*(2*Math.PI)/p )*.5 + ob.c + ob.b;
+    	}		//*/
+    },
+    Back: {
+    	easeOut: function (ob, s) {
+    				if (s == undefined) s = 1.70158;
+    				return ob.c*((ob.t=ob.t/ob.d-1)*ob.t*((s+1)*ob.t + s) + 1) + ob.b;
+    			},	//*/
+    /*	easeIn: function (ob, s) {
+    				if (s == undefined) s = 1.70158;
+    				return ob.c*(ob.t/=ob.d)*ob.t*((s+1)*ob.t - s) + ob.b;
+    			},		//*/
+    /*	easeInOut: function (ob, s) {
+    				if (s == undefined) s = 1.70158;
+    				if ((ob.t/=ob.d/2) < 1) return ob.c/2*(ob.t*ob.t*(((s*=(1.525))+1)*ob.t - s)) + ob.b;
+    				return ob.c/2*((ob.t-=2)*ob.t*(((s*=(1.525))+1)*ob.t + s) + 2) + ob.b;
+    			}	//*/
+    },
+    Bounce: {
+    /*	easeOut: function (ob) {
+    						if ((ob.t/=ob.d) < (1/2.75)) {
+    							return ob.c*(7.5625*ob.t*ob.t) + ob.t;
+    						} else if (ob.t < (2/2.75)) {
+    							return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.t;
+    						} else if (ob.t < (2.5/2.75)) {
+    							return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.t;
+    						} else {
+    							return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.t;
+    						}
+    				},		// !NONFUNCTIONAL */
+    /*	easeInOut: function (ob) {
+    						var newVar2 = {t: ob.t*2, b: 0, c: ob.c, d: ob.d}
+    						if (ob.t < ob.d/2) return Bounce.easeOut(newVar2) * .5 + ob.t;
+    						var newVar = {t: ob.t*2-ob.d, b: 0, c: ob.c, d: ob.d};
+    						return Bounce.easeOut(newVar) * .5 + ob.c*.5 + ob.t;
+    				},		// !NONFUNCTIONAL */
+    /*	easeIn: function (ob) {
+    						var newVar = {t: ob.t-ob.t, b: 0, c: ob.c, d: ob.d}
+    						return ob.c - Bounce.easeOut(newVar) + ob.t;
+    				},		// !NONFUNCTIONAL */
+    },	// !NONFUNCTIONAL
+    Quad: {
+    /*	easeIn: function(ob) {
+    			    return ob.c * (ob.t /= ob.d) * ob.t + ob.b;
+    			}			// !NONFUNCTIONAL */
+    /*	easeOut: function(ob) {
+    			    return -ob.c * (ob.t /= ob.d) * (ob.t - 2) + ob.b;
+    			}			// !NONFUNCTIONAL */
+    /*	easeInOut: function(ob) {
+    			if ((ob.t /= ob.d / 2) < 1) {
+    		        return ob.c / 2 * ob.t * ob.t + ob.b;
+    		    }
+    			return -ob.c / 2 * ((--ob.t) * (ob.t - 2) - 1) + ob.b;
+    			}		// !NONFUNCTIONAL */
+    },	// !NONFUNCTIONAL
+    Circ: {
+    /*	easeIn: function(ob) {
+    			    return ob.c * (1 - Math.sqrt(1 - (ob.t /= ob.d) * ob.t)) + ob.b;
+    			}			// !NONFUNCTIONAL */
+    /*	easeOut: function(ob) {
+    			    return ob.c * Math.sqrt(1 - (ob.t = ob.t / ob.d - 1) * ob.t) + ob.b;
+    			}			// !NONFUNCTIONAL */
+    /*	easeInOut: function(ob) {
+    				if ((ob.t /= ob.d / 2) < 1) {
+    			        return ob.c / 2 * (1 - Math.sqrt(1 - ob.t * ob.t)) + ob.b;
+    			    }
+    			    return ob.c / 2 * (Math.sqrt(1 - (ob.t -= 2) * ob.t) + 1) + ob.b;
 
-			}		// !NONFUNCTIONAL */
-}	// !NONFUNCTIONAL
+    			}		// !NONFUNCTIONAL */
+    }	// !NONFUNCTIONAL
+}
+
+/*
+ * Super natural's micro Tween Engine CSS Plugin
+ * http://www.wearesupernatural.com/
+ *
+ */
+
+var CSSTween = {
+	counter: 0,
+	curAnims: {},
+	vendorPrefixs: ["webkit", "moz"],
+}
+
+
+/*
+ * main controller
+ * 	@param obj: the tween object created in superTween.js
+*/
+CSSTween.applyCSSTransition = function(obj){
+
+	CSSTween.curAnims["anim"+CSSTween.counter] = obj;
+	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
+	obj.elem.setAttribute('data-tweenEnd', 'false');
+	CSSTween.counter++;
+
+
+
+	CSSTween.tweenStyles = {
+			top: "",
+			left: "",
+			width: "",
+			height: "",
+			opacity: "",
+			transitionDuration: "",
+			transitionProperty: "",
+			transform: "",
+			transitionTimingFunction: obj.ease,
+			transitionend: "",
+			transitionDelay: 0
+	}
+	var transitProp = "";
+	var transformProp = "";
+
+	//this is the loop that replaces the styles with any changes
+	for(var i = 0; i < obj.attr.length;i++){
+
+		var curAttr = CSSTween.naming(obj, i);
+
+		if(!curAttr.transform){
+			CSSTween.tweenStyles[curAttr.cssVar] = curAttr.value;
+		} else {
+			transformProp = curAttr.transform + " "+transformProp;
+		}
+		transitProp += curAttr.cssVar+", ";
+	}
+
+	CSSTween.tweenStyles.transform = transformProp;
+	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
+	CSSTween.tweenStyles.transitionProperty = transitProp;
+
+	if(obj.rawDelay){
+		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
+	} else {
+		CSSTween.tweenStyles.transitionDelay = '0s';
+	}
+
+	CSSTween.vendorPrefix([
+		'transitionDelay',
+		'transform',
+		'transitionDuration',
+		'transitionProperty',
+		'transitionTimingFunction'
+	], CSSTween.tweenStyles)
+
+	//obj.elem.style.webkitTransformOrigin = "top left";
+
+	//Apply the styles to the element
+	for(var prop in CSSTween.tweenStyles){
+		if(!CSSTween.tweenStyles[prop]){
+			CSSTween.tweenStyles[prop] = null;
+		}
+
+
+		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
+	}
+
+	//listen for transition complete && setup backup timer
+	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
+	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
+	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
+	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
+
+}
+
+/*
+ * fires on transition complete, removes anim from array and fires any onComplete Events
+ * 	@param e: transition event
+*/
+CSSTween.completeHandler = function(e){
+
+	var srcElem = e.srcElement || e.originalTarget;
+	var tweenCheck = srcElem.getAttribute("data-tweenEnd");
+
+
+	if(tweenCheck == "false"){
+		srcElem.setAttribute('data-tweenEnd', 'true');
+		srcElem.removeEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false  );
+		srcElem.removeEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
+		srcElem.removeEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
+		srcElem.removeEventListener( 'transitionend', CSSTween.completeHandler, false );
+
+		var animNum = srcElem.getAttribute('data-tweenNum');
+		var onComplete = CSSTween.curAnims[animNum].onComplete;
+
+		if(onComplete){
+			onComplete.apply(this, CSSTween.curAnims[animNum].onCompleteParams);
+		}
+
+		delete CSSTween.curAnims[animNum];
+	}
+}
+
+
+/*
+ * returns the appropriate value and suffix for each element passed in
+ * 	@param parObj: the tween object created in superTween.js
+ * 	@param unit: the attribute in question
+*/
+CSSTween.naming = function(parObj, unit){
+
+	obj = parObj.attr[unit]
+
+	/*
+	 * r = object to return
+	*/
+	var r = {
+		cssVar: obj.attr,
+		value: parObj.rawObj[obj.attr],
+		transform: null
+	}
+
+	if (obj.attr == 'x'||
+		obj.attr == 'y'||
+		obj.attr == 'width'||
+		obj.attr == 'height'){
+
+			if(obj.attr == 'x'){r.cssVar = "left"}
+			if(obj.attr == 'y'){r.cssVar = "top"}
+
+			r.value += "px";
+
+	} else if(obj.attr == 'transitionDuration'){
+			r.value +=  "s";
+
+	} else if(obj.attr == 'delay'){
+			r.value +=  "s";
+
+	} else if(obj.attr == 'rotate') {
+		r.transform = obj.attr+"("+r.value+"deg)"
+
+
+	} else if (	obj.attr == 'scaleX' ||
+				obj.attr == 'scaleY'){
+
+		var newScale = parObj.rawObj[obj.attr];
+		r.transform = obj.attr+"("+newScale+")"
+	}
+
+	return r;
+}
+
+
+/*
+ * adds vendor-prefixed variables to an object
+ * 	@param whatAttrArr: an array of attributes to vendorify
+ * 	@param whatObj: what object to put the newly prefixed variables into
+*/
+CSSTween.vendorPrefix = function(whatAttrArr, whatObj){
+	for(var i = 0; i < whatAttrArr.length; i++){
+		for(var k = 0; k < CSSTween.vendorPrefixs.length; k++){
+			var newVar = CSSTween.vendorPrefixs[k]+whatAttrArr[i].charAt(0).toUpperCase() + whatAttrArr[i].slice(1);
+			whatObj[newVar] = CSSTween.tweenStyles[whatAttrArr[i]];
+		}
+	}
+}
+
+
+/******************
+ *
+ * CSS EASES (only uncomment the ones you use)
+ *
+********************/
+CSSEase = {
+	Expo : {
+	//	easeIn: 'cubic-bezier(0.95, 0.05, 0.795, 0.035)',
+	//	easeOut: 'cubic-bezier(0.19, 1, 0.22, 1)',
+	//	easeInOut: 'cubic-bezier(1, 0, 0, 1)'
+	},	Quint : {
+	//	easeIn: 'cubic-bezier(0.755, 0.05, 0.855, 0.06)',
+	//	easeOut: 'cubic-bezier(0.23, 1, 0.32, 1)',
+	//	easeInOut: 'cubic-bezier(0.86, 0, 0.07, 1)'
+	},	Quart : {
+	//	easeIn: 'cubic-bezier(0.895, 0.03, 0.685, 0.22)',
+	//	easeOut: 'cubic-bezier(0.165, 0.84, 0.44, 1)',
+	//	easeInOut: 'cubic-bezier(0.77, 0, 0.175, 1)'
+	},	Cubic : {
+	//	easeIn: 'cubic-bezier(0.55, 0.055, 0.675, 0.19)',
+	//	easeOut: 'cubic-bezier(0.215, 0.61, 0.355, 1)',
+	//	easeInOut: 'cubic-bezier(0.645, 0.045, 0.355, 1)'
+	},	Linear : {
+		easeNone: 'linear'
+	},	Sine : {
+		easeIn: 'cubic-bezier(0.47, 0, 0.745, 0.715)',
+		easeOut:'cubic-bezier(0.39, 0.575, 0.565, 1)',
+		easeInOut:'cubic-bezier(0.445, 0.050, 0.550, 0.950)'
+	},	Elastic : { //NOT SUPPORTED
+	//	easeIn:
+	//	easeOut:
+	//	easeInOut:
+	},	Back : {
+	//	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
+		easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+	//	easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+	},	Bounce : { //NOT SUPPORTE
+	//	easeIn:
+	//	easeOut:
+	//	easeInOut:
+	},	Quad : {
+	//	easeIn: 'cubic-bezier(0.55, 0.085, 0.68, 0.53)',
+	//	easeOut: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+	//	easeInOut: 'cubic-bezier(0.455, 0.03, 0.515, 0.955)'
+	},	Circ: {
+	//	easeIn: 'cubic-bezier(0.6, 0.04, 0.98, 0.335)',
+	//	easeOut: 'cubic-bezier(0.075, 0.82, 0.165, 1)',
+	//	easeInOut: 'cubic-bezier(0.785, 0.135, 0.15, 0.86)'
+	}
+};

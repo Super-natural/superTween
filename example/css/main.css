@@ -19,8 +19,8 @@ body {
 	opacity: 1;
 	/*filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);*/
 	transform-origin: top left;
-	mozTransform-origin: top left;
-	webkitTransform-origin: top left;
+	-moz-transform-origin: top left;
+	-webkit-transform-origin: top left;
 	color: white;
 }
 
