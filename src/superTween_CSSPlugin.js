@@ -114,12 +114,16 @@ CSSTween.completeHandler = function(e){
 		var animNum = srcElem.getAttribute('data-tweenNum');
 		var onComplete = CSSTween.curAnims[animNum].onComplete;
 
-		//remove the transition
-		for(var prop in CSSTween.tweenStyles){
-			//CSSTween.tweenStyles[prop] = null;
-
-			srcElem.elem.style[prop] = null;//CSSTween.tweenStyles[prop];
-		}
+		CSSTween.transitionList = [
+			'transitionDelay',
+            'transitionDuration',
+            'transitionProperty',
+            'transitionTimingFunction'
+		]
+        CSSTween.vendorPrefix(CSSTween.transitionList, CSSTween.transitionList)
+        for(var i=0;i<CSSTween.transitionList.length;i++){
+            srcElem.style[CSSTween.transitionList[i]] = "";
+        }
 
 
 		if(onComplete){

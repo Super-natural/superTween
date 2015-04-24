@@ -31,7 +31,7 @@ App.timeline.doStep = function(whatStep){
 			App.superTween.to(App.dom.elemY, 1, {x: 300, y:500, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 2,
 													useJS: true,
 													onComplete: App.utils.goTo,
-													onCompleteParams: [1]});
+													onCompleteParams: [5]});
 			break;
 
 		case 1:
@@ -58,7 +58,19 @@ App.timeline.doStep = function(whatStep){
 													onCompleteParams: [0]});
 			break;
 
+
+
+		case 5:
+				App.dom.elemW.style.left = "0px";
+				App.dom.elemX.style.left = "0px";
+				App.dom.elemY.style.left = "0px";
+				break;
+
 	}
+
+
+
+
 }
 
 

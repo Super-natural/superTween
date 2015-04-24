@@ -1,7 +1,7 @@
 {
   "name": "SuperTween",
   "description": "A standard ad replacement for greensock",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "^0.6.0",

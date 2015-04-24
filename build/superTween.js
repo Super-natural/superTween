@@ -1,4 +1,4 @@
-/*! SuperTween version 0.3.0. Created 14-04-2015 */
+/*! SuperTween version 0.3.1. Created 24-04-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -37,10 +37,11 @@ superTween.init = function(){
     elem = document.createElement('div');
 
     if( elem.style.transition !== undefined ) { superTween.useCSS = true; }
+
     if( superTween.useCSS === false ) {
-        feat = "transition";
-        featurenameCapital = feat.charAt(0).toUpperCase() + feat.substr(1);
+        featurenameCapital = "Transition";
         for( var i = 0; i < domPrefixes.length; i++ ) {
+        //    console.dir(elem.style[domPrefixes[i] + featurenameCapital ]);
             if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
                 superTween.useCSS = true;
               break;
@@ -81,7 +82,7 @@ superTween.to = function(elem, time, obj){
 
     //If the CSS plugin is available as well as supported by browser, use CSS
     if(superTween.useCSS && CSSTween){
-        console.log(obj.useJS)
+
         CSSTween.applyCSSTransition(newTween);
 
     } else {
@@ -360,7 +361,7 @@ JSTween.setPos = function(elem, obj, val){
 			//IE8 Opacity fix
 			if ('filters' in elem){
                 if(elem.filters.item){
-				    elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
+				    //elem.filters.item("DXImageTransform.Microsoft.Alpha").opacity = (val*100);
 			    }
             }
 			break;
@@ -567,7 +568,7 @@ var JSEase = {
 var CSSTween = {
 	counter: 0,
 	curAnims: {},
-	vendorPrefixs: ["webkit", "moz"],
+	vendorPrefixs: ["webkit", "Moz"],
 }
 
 
@@ -576,6 +577,7 @@ var CSSTween = {
  * 	@param obj: the tween object created in superTween.js
 */
 CSSTween.applyCSSTransition = function(obj){
+
 
 	CSSTween.curAnims["anim"+CSSTween.counter] = obj;
 	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
@@ -635,6 +637,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 	//Apply the styles to the element
 	for(var prop in CSSTween.tweenStyles){
+
 		if(!CSSTween.tweenStyles[prop]){
 			CSSTween.tweenStyles[prop] = null;
 		}
@@ -642,6 +645,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
 	}
+
 
 	//listen for transition complete && setup backup timer
 	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
@@ -670,6 +674,18 @@ CSSTween.completeHandler = function(e){
 
 		var animNum = srcElem.getAttribute('data-tweenNum');
 		var onComplete = CSSTween.curAnims[animNum].onComplete;
+
+		CSSTween.transitionList = [
+			'transitionDelay',
+            'transitionDuration',
+            'transitionProperty',
+            'transitionTimingFunction'
+		]
+        CSSTween.vendorPrefix(CSSTween.transitionList, CSSTween.transitionList)
+        for(var i=0;i<CSSTween.transitionList.length;i++){
+            srcElem.style[CSSTween.transitionList[i]] = "";
+        }
+
 
 		if(onComplete){
 			onComplete.apply(this, CSSTween.curAnims[animNum].onCompleteParams);
