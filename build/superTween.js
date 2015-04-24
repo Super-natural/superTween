@@ -675,15 +675,21 @@ CSSTween.completeHandler = function(e){
 		var animNum = srcElem.getAttribute('data-tweenNum');
 		var onComplete = CSSTween.curAnims[animNum].onComplete;
 
-		CSSTween.transitionList = [
+		CSSTween.transitionList = {}
+		var transitionArr = [
 			'transitionDelay',
             'transitionDuration',
             'transitionProperty',
             'transitionTimingFunction'
 		]
-        CSSTween.vendorPrefix(CSSTween.transitionList, CSSTween.transitionList)
-        for(var i=0;i<CSSTween.transitionList.length;i++){
-            srcElem.style[CSSTween.transitionList[i]] = "";
+        CSSTween.vendorPrefix(transitionArr, CSSTween.transitionList)
+        for(var i=0;i<transitionArr.length;i++){
+            CSSTween.transitionList[transitionArr[i]] = "";
+        }
+
+        //Apply the styles to the element
+        for(var prop in CSSTween.transitionList){
+            srcElem.style[prop] = "";
         }
 
 
