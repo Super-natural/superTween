@@ -14,6 +14,8 @@ App.timeline.init = function(){
 
 	App.dom.appMain = document.getElementById('appMain');
 
+	App.dom.elem360 = document.getElementById('elem360');
+
 	App.dom.elemW = document.getElementById('elemW');
 	App.dom.elemX = document.getElementById('elemX');
 	App.dom.elemY = document.getElementById('elemY');
@@ -26,9 +28,12 @@ App.timeline.doStep = function(whatStep){
 	App.log("Step: "+whatStep)
 	switch(whatStep){
 		case 0:
+			App.superTween.run360(App.dom.elem360, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
+
+
 			App.superTween.to(App.dom.elemW, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, rotate: 45, opacity: 0.5, ease: 'Linear.easeNone'});
 			App.superTween.to(App.dom.elemX, 1, {x: 300, y:400, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 1});
-			App.superTween.to(App.dom.elemY, 1, {x: 300, y:500, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 2,
+			App.superTween.to(App.dom.elemY, 4, {x: 300, y:500, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 2,
 													useJS: true,
 													onComplete: App.utils.goTo,
 													onCompleteParams: [5]});
@@ -61,9 +66,16 @@ App.timeline.doStep = function(whatStep){
 
 
 		case 5:
+
+			superTween.killAll()
+
+				/*
 				App.dom.elemW.style.left = "0px";
 				App.dom.elemX.style.left = "0px";
 				App.dom.elemY.style.left = "0px";
+				*/
+
+
 				break;
 
 	}

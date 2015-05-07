@@ -50,7 +50,17 @@ superTween.init = function(){
 }
 
 
+superTween.run360 = function(elem, loops, obj){
+    if(super360){
+        super360.run360(elem, loops, obj);
+    }
+}
 
+superTween.kill360 = function(elem){
+    if(super360){
+        super360.kill360(elem);
+    }
+}
 
 
 /* @param elem: element to be tweened
@@ -105,6 +115,11 @@ superTween.killAll = function(){
         for(var prop in CSSTween.tweenStyles){
             CSSTween.curAnims[anim].elem.style[prop] = null;
         }
+    }
+
+
+    if(super360){
+        super360.killAll360()
     }
 }
 
