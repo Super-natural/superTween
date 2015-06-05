@@ -1,18 +1,18 @@
 # superTween
-A very small tweening engine for those teeny tiny projects
+A very small tweening engine for those teeny tiny projects (Minified with 5 tween ease options is 9kb)
 
 A Tweening library that was initially built for animation within projects with
 incredibly tight file restrictions. The current build supports commands following this structure:
 
 	superTween.to(
 		elem,              				//DOM element to animate
-                1,                	 			//Length of animation (in seconds)
-                {
-                        opacity: Number,                        //target alpha
-                        x: Number,                              //distance to move on x axis (in pixels)
-                        y: Number,                              //distance to move on y axis (in pixels)
-                        scaleX: Number,                         //X Scale
-                        scaleY: Number,                         //Y Scale
+		1,                	 			//Length of animation (in seconds)
+		{
+			opacity: Number,                        //target alpha
+			x: Number,                              //distance to move on x axis (in pixels)
+			y: Number,                              //distance to move on y axis (in pixels)
+			scaleX: Number,                         //X Scale
+			scaleY: Number,                         //Y Scale
 			delay: Number,                          //Animation delay (in seconds)
 			ease: String,         			//ease to use
 			onComplete: Function,    		//function called on complete
