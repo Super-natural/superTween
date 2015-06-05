@@ -1,9 +1,60 @@
 # superTween
 A very small tweening engine for those teeny tiny projects (Minified with 5 tween ease options is 9kb)
 
-A Tweening library that was initially built for animation within projects with
-incredibly tight file restrictions. The current build supports commands following this structure:
+It was initially built for animation within projects with incredibly tight file restrictions.
 
+#Quick start
+- 1) include build/superTween.js OR build/superTween.min.js in your html
+- 2) call javascript function in your script:
+
+example:
+	
+	// get a dom element
+	var tweenMe = document.getElementById('elementToAnimate);
+	
+	// to run a complicated tween
+	superTween.to(tweenMe, 4, {
+		x: 300, 
+		y:500, 
+		scaleY: 0.5, 
+		scaleX: 2, 
+		rotate: 45,	
+		opacity: 0.5, 
+		ease: 'Linear.easeNone', 
+		delay: 2,
+		onComplete: animationCompleteFunction,
+		onCompleteParams: ['stringToPassToFunction', 'anotherString']
+	});
+	
+	// or a more basic version:
+	superTween.to(tweenMe, 4, {
+		x: 300, 
+		y: 500, 
+	});
+	
+	// to run a 360
+	superTween.run360(tweenMe, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
+	
+
+This relies on the DOM object being absolutely positioned and runs off offsetLeft and OffsetRight
+currently there is some lag on slower machines and a few mobile devices when trying to tween a large amount of objects,
+specifically if changing object opacity
+
+
+# Some Background
+The SuperTween library attempts to initially use CSS Transitions to achieve the required tween, first checking to see if
+CSS transition is available, if not available there is a JS fallback for every tween. The tween eases are all based on
+Robert Penners easing equations
+
+# Public Functions
+	superTween.to(elem, time, parameters);
+	superTween.killAll();
+	superTween.run360(elem, loops, parameters);
+	superTween.kill360(elem);
+	
+## superTween.to
+Starts a tween with the given parameters as detailed below
+	
 	superTween.to(
 		elem,              				//DOM element to animate
 		1,                	 			//Length of animation (in seconds)
@@ -19,23 +70,14 @@ incredibly tight file restrictions. The current build supports commands followin
 			onCompleteParams: Array,        	//paramenters to pass to completion function
 		});
 
+## superTween.killAll
+Stops all animation currently being handled by superTween
 
+##superTween.run360
+Runs a 360 animation (see below for more)
 
-This relies on the DOM object being absolutely positioned and runs off offsetLeft and OffsetRight
-currently there is some lag on slower machines and a few mobile devices when trying to tween a large amount of objects,
-specifically if changing object opacity
-
-
-# Some Background
-The SuperTween library attempts to initially use CSS Transitions to achieve the required tween, first checking to see if
-CSS transition is available, if not available there is a JS fallback for every tween. The tween eases are all based on
-Robert Penners easing equations
-
-# Public Functions
-	superTween.to(elem:HTMLElement, time:Number, parameters:Object);
-	superTween.killAll();
-	superTween.run360(elem:HTMLElement, loops:Number, parameters:Object);
-	superTween.kill360(elem:HTMLElement);
+##superTween.kill360
+Kills a 360 on the given element
 
 # A look at 360's
 These are a custom fix to create more engaging videos on devices that do not allow autoplaying video. It requires a spritesheet of frames stitched together vertically. the superTween command that launches one of these incrementally jumps the image a set distance on a specified interval allowing a short preview of a video the be autoplayed and looped for a more engaging experience. 
@@ -67,32 +109,3 @@ Quint  |  maybe	| maybe	| -	| -
 Quart  | maybe	| maybe	| -	| -
 Cubic  |  maybe	| maybe	| -	| -
 
-#Quick start
-- 1) download package 
-- 2) include build/superTween.js OR build/superTween.min.js in your js scripts folder and include in html
-- 3a) call function in your code:
-
-example:
-
-	//to run a 360
-	superTween.run360(App.dom.elem360, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
-	
-	//to run a classic tween
-	superTween.to(App.dom.elemY, 4, {
-		x: 300, 
-		y:500, 
-		scaleY: 0.5, 
-		scaleX: 2, 
-		rotate: 45,	
-		opacity: 0.5, 
-		ease: 'Linear.easeNone', 
-		delay: 2,
-		onComplete: App.utils.goTo,
-		onCompleteParams: [5]
-	});
-	
-	//or a more basic version:
-	superTween.to(App.dom.elemY, 4, {
-		x: 300, 
-		y:500, 
-	});
