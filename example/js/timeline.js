@@ -34,7 +34,6 @@ App.timeline.doStep = function(whatStep){
 			App.superTween.to(App.dom.elemW, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, rotate: 45, opacity: 0.5, ease: 'Linear.easeNone'});
 			App.superTween.to(App.dom.elemX, 1, {x: 300, y:400, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 1});
 			App.superTween.to(App.dom.elemY, 4, {x: 300, y:500, scaleY: 0.5, scaleX: 2, rotate: 45,	opacity: 0.5, ease: 'Linear.easeNone', delay: 2,
-													useJS: true,
 													onComplete: App.utils.goTo,
 													onCompleteParams: [5]});
 			break;

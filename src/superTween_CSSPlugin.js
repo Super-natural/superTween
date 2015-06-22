@@ -11,7 +11,7 @@ var CSSTween = {
 }
 
 
-/*
+/**
  * main controller
  * 	@param obj: the tween object created in superTween.js
 */
@@ -94,7 +94,7 @@ CSSTween.applyCSSTransition = function(obj){
 
 }
 
-/*
+/**
  * fires on transition complete, removes anim from array and fires any onComplete Events
  * 	@param e: transition event
 */
@@ -141,7 +141,7 @@ CSSTween.completeHandler = function(e){
 }
 
 
-/*
+/**
  * returns the appropriate value and suffix for each element passed in
  * 	@param parObj: the tween object created in superTween.js
  * 	@param unit: the attribute in question
@@ -190,7 +190,7 @@ CSSTween.naming = function(parObj, unit){
 }
 
 
-/*
+/**
  * adds vendor-prefixed variables to an object
  * 	@param whatAttrArr: an array of attributes to vendorify
  * 	@param whatObj: what object to put the newly prefixed variables into

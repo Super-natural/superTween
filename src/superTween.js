@@ -49,13 +49,18 @@ superTween.init = function(){
     }
 }
 
-
+/*
+ * Triggers the 360 funtions, a breakdown of params is found in the plugin
+*/
 superTween.run360 = function(elem, loops, obj){
     if(super360){
         super360.run360(elem, loops, obj);
     }
 }
 
+/*
+ * stops a specified 360
+*/
 superTween.kill360 = function(elem){
     if(super360){
         super360.kill360(elem);
@@ -63,7 +68,8 @@ superTween.kill360 = function(elem){
 }
 
 
-/* @param elem: element to be tweened
+/**
+ * @param elem: element to be tweened
  * @param time: length of animation
  * @param obj{
  *	 		delay: Dime to delay (in seconds)
@@ -124,7 +130,7 @@ superTween.killAll = function(){
 }
 
 
-/*
+/**
  * Initialises a tween and does the math to work out what does what
  * @param elem: element the tween is acting upon
  * @param time: length of time of tween
@@ -170,7 +176,7 @@ superTween.fn.setupTween = function(elem, time, obj){
 	return tweenObj;
 }
 
-/*
+/**
  * Getting and setting the variables for a new Tween
 */
 superTween.fn.getAttr = function(elem, obj){
@@ -193,7 +199,7 @@ superTween.fn.getAttr = function(elem, obj){
 	return returnVar;
 }
 
-/*
+/**
  * Gets the current position of whatever attribute is being changed
  *  @param elem: element under question
  *  @param attr: attribute under question
@@ -271,7 +277,7 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 	}
 }
 
-/*
+/**
  * returns the amount of change an element will undergo in the specified attribute
  *  @param attr: attribute under question
  *  @param targ: the end value of the tween
@@ -290,7 +296,7 @@ superTween.fn.getTarg = function(attr, targ, orig, elem){
 }
 
 
-/*
+/**
  * The 'onUpdate' loop run if it it a JS tween
 */
 JSTween.tweenLoop = function(){
@@ -344,7 +350,7 @@ JSTween.tweenLoop = function(){
 	}
 }
 
-/*
+/**
  * Sets the new value for a given attribute
  *  @param elem: element under question
  *  @param obj: object containing tween vars

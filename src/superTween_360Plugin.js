@@ -1,21 +1,3 @@
-/*
- * RUNS THE SUPER 360
- *
- * @param elem: An html element to apply 360 background animation to
- * @param loops:  number of loops or 'infinite'
- * @param obj: {
- * 			numSteps: Total number of steps to complete loop
- *			stepSize: distance to 'step'
- *			interval: speed at which to step
- *			bgOffset(optional): if image is offset (for centering larger 360s into smaller image)
- *		}
- */
-/*
-var superTween = superTween || {}
-	superTween.config = superTween.config || {}
-	superTween.config.timers360 = {}
-*/
-
 var super360 = {
 	config: {
 		timers360: {}
@@ -23,7 +5,13 @@ var super360 = {
 }
 
 
-//superTween.run360 = function(element, imgOffset, numSteps, interval, infiniteLoop, bgOffset){
+/**
+ * Triggers the 360 event
+ *
+ * @param {HTMLElement} elem The HTML element on which the tween is being used
+ * @param {Number} loops Amount of times to loop the 360
+ * @param {Object} obj Variables to define the 360: imgOffset, numSteps, interval, bgOffset(optional, default 0), direction(optional, default vertical)
+ */
 super360.run360 = function(elem, loops, obj){
 
 	//superTween.run360(thisElem, infinite, {numSteps: 45, stepSize: 170, interval: 150, bgOffset: null})
@@ -33,14 +21,21 @@ super360.run360 = function(elem, loops, obj){
 	if(obj.bgOffset == null){obj.bgOffset = 0};
 
 	super360.config.timers360[elem.id] = window.setInterval(function(){
-		elem.style.backgroundPosition =  obj.bgOffset+" " + (-(obj.stepSize*curStep)) + "px";
+		if (obj.direction == "horizontal"){
+			elem.style.backgroundPosition =  (-(obj.stepSize*curStep)) + "px "+obj.bgOffset+"px";
+		}
+		else {
+			elem.style.backgroundPosition =  obj.bgOffset+" " + (-(obj.stepSize*curStep)) + "px";
+		}
 		curStep++;
 
 		if (curStep == obj.numSteps){
 			if (loops == "infinite"){
+				elem.style.backgroundPositionX =  0 + "px";
 				elem.style.backgroundPositionY =  0 + "px";
 				curStep = 1;
 			} else if (loops > curLoop){
+				elem.style.backgroundPositionX =  0 + "px";
 				elem.style.backgroundPositionY =  0 + "px";
 				curStep = 1;
 				curLoop ++
