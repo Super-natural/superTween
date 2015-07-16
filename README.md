@@ -1,11 +1,11 @@
 # superTween
-A very small tweening engine for those teeny tiny projects (Minified with 5 tween ease options is 9kb)
+A very small tweening engine for those teeny tiny projects (minified with 5 tween ease options is 9kb).
 
 It was initially built for animation within projects with incredibly tight file restrictions.
 
 #Quick start
 - 1) include build/superTween.js OR build/superTween.min.js in your html
-- 2) call javascript function in your script:
+- 2) call JavaScript function in your script:
 
 example:
 
@@ -36,15 +36,15 @@ example:
 	superTween.run360(tweenMe, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
 
 
-This relies on the DOM object being absolutely positioned and runs off offsetLeft and OffsetRight
-currently there is some lag on slower machines and a few mobile devices when trying to tween a large amount of objects,
-specifically if changing object opacity
+This relies on the DOM object being absolutely positioned and runs off offsetLeft and offsetRight.
+Currently there is some lag on slower machines and a few mobile devices when trying to tween a large amount of objects,
+specifically if changing object opacity.
 
 
 # Some Background
-The SuperTween library attempts to initially use CSS Transitions to achieve the required tween, first checking to see if
-CSS transition is available, if not available there is a JS fallback for every tween. The tween eases are all based on
-Robert Penners easing equations
+The superTween library attempts to initially use CSS Transitions to achieve the required tween, first checking to see if
+CSS transition is available. If not available there is a JS fallback for every tween. The tween eases are all based on
+Robert Penner's easing equations.
 
 # Public Functions
 	superTween.to(elem, time, parameters);
@@ -53,7 +53,7 @@ Robert Penners easing equations
 	superTween.kill360(elem);
 
 ## superTween.to
-Starts a tween with the given parameters as detailed below
+Starts a tween with the given parameters as detailed below:
 
 	superTween.to(
 		elem,              				//DOM element to animate
@@ -79,8 +79,8 @@ Runs a 360 animation (see below for more)
 ##superTween.kill360
 Kills a 360 on the given element
 
-# A look at 360's
-These are a custom fix to create more engaging videos on devices that do not allow autoplaying video. It requires a spritesheet of frames stitched together vertically. the superTween command that launches one of these incrementally jumps the image a set distance on a specified interval allowing a short preview of a video the be autoplayed and looped for a more engaging experience.
+# A look at 360s
+These are a custom fix to create more engaging videos on devices that do not allow autoplaying video. It requires a spritesheet of frames stitched together vertically. The superTween command that launches one of these incrementally jumps the image a set distance on a specified interval allowing a short preview of a video the be autoplayed and looped for a more engaging experience.
 The object parameters are as follows:
 
 	superTween.run360(
@@ -94,7 +94,7 @@ The object parameters are as follows:
 		});
 
 # A note on eases
-The library includes most of Robert penners easing equations, and part of the library's small size comes from being able to only include eases that are used in the project (though this is a manual process).
+The library includes most of Robert Penner's easing equations, and part of the library's small size comes from being able to only include eases that are used in the project (though this is a manual process).
 
 - "yes" = immediately available on download
 - "maybe" = available, but needs to be manually enabled
