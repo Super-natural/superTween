@@ -52,18 +52,18 @@ superTween.init = function(){
 /*
  * Triggers the 360 funtions, a breakdown of params is found in the plugin
 */
-superTween.run360 = function(elem, loops, obj){
-    if(super360){
-        super360.run360(elem, loops, obj);
+superTween.superLoop = function(elem, loops, obj){
+    if(superLoop){
+        superLoop.runSuperLoop(elem, loops, obj);
     }
 }
 
 /*
  * stops a specified 360
 */
-superTween.kill360 = function(elem){
-    if(super360){
-        super360.kill360(elem);
+superTween.killSuperLoop = function(elem){
+    if(superLoop){
+        superLoop.killSuperLoop(elem);
     }
 }
 
@@ -124,8 +124,8 @@ superTween.killAll = function(){
     }
 
 
-    if(super360){
-        super360.killAll360()
+    if(superLoop){
+        superLoop.killAllSuperLoop()
     }
 }
 
@@ -313,8 +313,7 @@ JSTween.tweenLoop = function(){
 				}
 
 				var newVal = anims[i].ease(passObj);
-
-                JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
+          JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
 			}
 
 			anims[i].t ++;
@@ -515,7 +514,7 @@ var JSEase = {
     				if (s == undefined) s = 1.70158;
     				return ob.c*((ob.t=ob.t/ob.d-1)*ob.t*((s+1)*ob.t + s) + 1) + ob.b;
     			},	//*/
-    /*	easeIn: function (ob, s) {
+    	easeIn: function (ob, s) {
     				if (s == undefined) s = 1.70158;
     				return ob.c*(ob.t/=ob.d)*ob.t*((s+1)*ob.t - s) + ob.b;
     			},		//*/
@@ -526,17 +525,17 @@ var JSEase = {
     			}	//*/
     },
     Bounce: {
-    /*	easeOut: function (ob) {
-    						if ((ob.t/=ob.d) < (1/2.75)) {
-    							return ob.c*(7.5625*ob.t*ob.t) + ob.t;
-    						} else if (ob.t < (2/2.75)) {
-    							return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.t;
-    						} else if (ob.t < (2.5/2.75)) {
-    							return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.t;
-    						} else {
-    							return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.t;
-    						}
-    				},		// !NONFUNCTIONAL */
+    	easeOut: function (ob) {
+    		if ((ob.t/=ob.d) < (1/2.75)) {
+    			return ob.c*(7.5625*ob.t*ob.t) + ob.b;
+    		} else if (ob.t < (2/2.75)) {
+    			return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.b;
+    		} else if (ob.t < (2.5/2.75)) {
+    			return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.b;
+    		} else {
+    			return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.b;
+    		}
+    	},
     /*	easeInOut: function (ob) {
     						var newVar2 = {t: ob.t*2, b: 0, c: ob.c, d: ob.d}
     						if (ob.t < ob.d/2) return Bounce.easeOut(newVar2) * .5 + ob.t;

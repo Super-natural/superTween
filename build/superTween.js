@@ -1,4 +1,4 @@
-/*! SuperTween version 0.3.2. Created 22-06-2015 */
+/*! SuperTween version 0.4.0. Created 24-08-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -53,18 +53,18 @@ superTween.init = function(){
 /*
  * Triggers the 360 funtions, a breakdown of params is found in the plugin
 */
-superTween.run360 = function(elem, loops, obj){
-    if(super360){
-        super360.run360(elem, loops, obj);
+superTween.superLoop = function(elem, loops, obj){
+    if(superLoop){
+        superLoop.runSuperLoop(elem, loops, obj);
     }
 }
 
 /*
  * stops a specified 360
 */
-superTween.kill360 = function(elem){
-    if(super360){
-        super360.kill360(elem);
+superTween.killSuperLoop = function(elem){
+    if(superLoop){
+        superLoop.killSuperLoop(elem);
     }
 }
 
@@ -125,8 +125,8 @@ superTween.killAll = function(){
     }
 
 
-    if(super360){
-        super360.killAll360()
+    if(superLoop){
+        superLoop.killAllSuperLoop()
     }
 }
 
@@ -314,8 +314,7 @@ JSTween.tweenLoop = function(){
 				}
 
 				var newVal = anims[i].ease(passObj);
-
-                JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
+          JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
 			}
 
 			anims[i].t ++;
@@ -516,7 +515,7 @@ var JSEase = {
     				if (s == undefined) s = 1.70158;
     				return ob.c*((ob.t=ob.t/ob.d-1)*ob.t*((s+1)*ob.t + s) + 1) + ob.b;
     			},	//*/
-    /*	easeIn: function (ob, s) {
+    	easeIn: function (ob, s) {
     				if (s == undefined) s = 1.70158;
     				return ob.c*(ob.t/=ob.d)*ob.t*((s+1)*ob.t - s) + ob.b;
     			},		//*/
@@ -527,17 +526,17 @@ var JSEase = {
     			}	//*/
     },
     Bounce: {
-    /*	easeOut: function (ob) {
-    						if ((ob.t/=ob.d) < (1/2.75)) {
-    							return ob.c*(7.5625*ob.t*ob.t) + ob.t;
-    						} else if (ob.t < (2/2.75)) {
-    							return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.t;
-    						} else if (ob.t < (2.5/2.75)) {
-    							return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.t;
-    						} else {
-    							return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.t;
-    						}
-    				},		// !NONFUNCTIONAL */
+    	easeOut: function (ob) {
+    		if ((ob.t/=ob.d) < (1/2.75)) {
+    			return ob.c*(7.5625*ob.t*ob.t) + ob.b;
+    		} else if (ob.t < (2/2.75)) {
+    			return ob.c*(7.5625*(ob.t-=(1.5/2.75))*ob.t + .75) + ob.b;
+    		} else if (ob.t < (2.5/2.75)) {
+    			return ob.c*(7.5625*(ob.t-=(2.25/2.75))*ob.t + .9375) + ob.b;
+    		} else {
+    			return ob.c*(7.5625*(ob.t-=(2.625/2.75))*ob.t + .984375) + ob.b;
+    		}
+    	},
     /*	easeInOut: function (ob) {
     						var newVar2 = {t: ob.t*2, b: 0, c: ob.c, d: ob.d}
     						if (ob.t < ob.d/2) return Bounce.easeOut(newVar2) * .5 + ob.t;
@@ -820,12 +819,12 @@ CSSEase = {
 	//	easeOut:
 	//	easeInOut:
 	},	Back : {
-	//	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
-		easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+	  	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
+			easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
 	//	easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
 	},	Bounce : { //NOT SUPPORTE
 	//	easeIn:
-	//	easeOut:
+	  	easeOut: 'cubic-bezier(0.765, 1.850, 0.235, 0.510)'
 	//	easeInOut:
 	},	Quad : {
 	//	easeIn: 'cubic-bezier(0.55, 0.085, 0.68, 0.53)',
@@ -838,9 +837,9 @@ CSSEase = {
 	}
 };
 
-var super360 = {
+var superLoop = {
 	config: {
-		timers360: {}
+		superLoopTimers: {}
 	}
 }
 
@@ -852,15 +851,15 @@ var super360 = {
  * @param {Number} loops Amount of times to loop the 360
  * @param {Object} obj Variables to define the 360: imgOffset, numSteps, interval, bgOffset(optional, default 0), direction(optional, default vertical)
  */
-super360.run360 = function(elem, loops, obj){
+superLoop.runSuperLoop = function(elem, loops, obj){
 
-	//superTween.run360(thisElem, infinite, {numSteps: 45, stepSize: 170, interval: 150, bgOffset: null})
+	//superTween.runSuperLoop(thisElem, infinite, {numSteps: 45, stepSize: 170, interval: 150, bgOffset: null})
 
 	var curLoop = 1;
 	var curStep = 1;
 	if(obj.bgOffset == null){obj.bgOffset = 0};
 
-	super360.config.timers360[elem.id] = window.setInterval(function(){
+	superLoop.config.superLoopTimers[elem.id] = window.setInterval(function(){
 		if (obj.direction == "horizontal"){
 			elem.style.backgroundPosition =  (-(obj.stepSize*curStep)) + "px "+obj.bgOffset+"px";
 		}
@@ -880,7 +879,7 @@ super360.run360 = function(elem, loops, obj){
 				curStep = 1;
 				curLoop ++
 			} else {
-				window.clearInterval(super360.config.timers360[elem.id]);
+				window.clearInterval(superLoop.config.superLoopTimers[elem.id]);
 			}
 		}
 	}, obj.interval)
@@ -893,9 +892,10 @@ super360.run360 = function(elem, loops, obj){
  * @param element An html element to remove the 360 background animation from
  */
 
-super360.kill360 = function(element){
+superLoop.killSuperLoop = function(element){
 	element.style.backgroundPositionY =  0 + "px";
-	window.clearInterval(super360.config.timers360[element.id]);
+	element.style.backgroundPositionX =  0 + "px";
+	window.clearInterval(superLoop.config.superLoopTimers[element.id]);
 }
 
 
@@ -905,9 +905,9 @@ super360.kill360 = function(element){
  * @param element An html element to remove the 360 background animation from
  */
 
-super360.killAll360 = function(){
-	for(var thisTime in super360.config.timers360){
+superLoop.killAllSuperLoop = function(){
+	for(var thisTime in superLoop.config.superLoopTimers){
 		document.getElementById(thisTime).style.backgroundPositionY =  0 + "px";
-		window.clearInterval(super360.config.timers360[thisTime]);
+		window.clearInterval(superLoop.config.superLoopTimers[thisTime]);
 	}
 }

@@ -238,12 +238,12 @@ CSSEase = {
 	//	easeOut:
 	//	easeInOut:
 	},	Back : {
-	//	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
-		easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+	  	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
+			easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
 	//	easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
 	},	Bounce : { //NOT SUPPORTE
 	//	easeIn:
-	//	easeOut:
+	  	easeOut: 'cubic-bezier(0.765, 1.850, 0.235, 0.510)'
 	//	easeInOut:
 	},	Quad : {
 	//	easeIn: 'cubic-bezier(0.55, 0.085, 0.68, 0.53)',

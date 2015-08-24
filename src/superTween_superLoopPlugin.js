@@ -1,6 +1,6 @@
-var super360 = {
+var superLoop = {
 	config: {
-		timers360: {}
+		superLoopTimers: {}
 	}
 }
 
@@ -12,15 +12,15 @@ var super360 = {
  * @param {Number} loops Amount of times to loop the 360
  * @param {Object} obj Variables to define the 360: imgOffset, numSteps, interval, bgOffset(optional, default 0), direction(optional, default vertical)
  */
-super360.run360 = function(elem, loops, obj){
+superLoop.runSuperLoop = function(elem, loops, obj){
 
-	//superTween.run360(thisElem, infinite, {numSteps: 45, stepSize: 170, interval: 150, bgOffset: null})
+	//superTween.runSuperLoop(thisElem, infinite, {numSteps: 45, stepSize: 170, interval: 150, bgOffset: null})
 
 	var curLoop = 1;
 	var curStep = 1;
 	if(obj.bgOffset == null){obj.bgOffset = 0};
 
-	super360.config.timers360[elem.id] = window.setInterval(function(){
+	superLoop.config.superLoopTimers[elem.id] = window.setInterval(function(){
 		if (obj.direction == "horizontal"){
 			elem.style.backgroundPosition =  (-(obj.stepSize*curStep)) + "px "+obj.bgOffset+"px";
 		}
@@ -40,7 +40,7 @@ super360.run360 = function(elem, loops, obj){
 				curStep = 1;
 				curLoop ++
 			} else {
-				window.clearInterval(super360.config.timers360[elem.id]);
+				window.clearInterval(superLoop.config.superLoopTimers[elem.id]);
 			}
 		}
 	}, obj.interval)
@@ -53,9 +53,10 @@ super360.run360 = function(elem, loops, obj){
  * @param element An html element to remove the 360 background animation from
  */
 
-super360.kill360 = function(element){
+superLoop.killSuperLoop = function(element){
 	element.style.backgroundPositionY =  0 + "px";
-	window.clearInterval(super360.config.timers360[element.id]);
+	element.style.backgroundPositionX =  0 + "px";
+	window.clearInterval(superLoop.config.superLoopTimers[element.id]);
 }
 
 
@@ -65,9 +66,9 @@ super360.kill360 = function(element){
  * @param element An html element to remove the 360 background animation from
  */
 
-super360.killAll360 = function(){
-	for(var thisTime in super360.config.timers360){
+superLoop.killAllSuperLoop = function(){
+	for(var thisTime in superLoop.config.superLoopTimers){
 		document.getElementById(thisTime).style.backgroundPositionY =  0 + "px";
-		window.clearInterval(super360.config.timers360[thisTime]);
+		window.clearInterval(superLoop.config.superLoopTimers[thisTime]);
 	}
 }
