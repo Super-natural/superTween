@@ -1,4 +1,4 @@
-/*! SuperTween version 0.4.0. Created 24-08-2015 */
+/*! SuperTween version 0.4.1. Created 27-10-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -880,6 +880,15 @@ superLoop.runSuperLoop = function(elem, loops, obj){
 				curLoop ++
 			} else {
 				window.clearInterval(superLoop.config.superLoopTimers[elem.id]);
+
+				if(obj.onComplete){
+					var func = obj.onComplete;
+					var vars = obj.onCompleteParams;
+				}
+
+				if(func){
+					func.apply(this, vars);
+				}
 			}
 		}
 	}, obj.interval)

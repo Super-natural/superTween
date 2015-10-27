@@ -41,6 +41,15 @@ superLoop.runSuperLoop = function(elem, loops, obj){
 				curLoop ++
 			} else {
 				window.clearInterval(superLoop.config.superLoopTimers[elem.id]);
+
+				if(obj.onComplete){
+					var func = obj.onComplete;
+					var vars = obj.onCompleteParams;
+				}
+
+				if(func){
+					func.apply(this, vars);
+				}
 			}
 		}
 	}, obj.interval)
