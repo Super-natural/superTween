@@ -17,13 +17,12 @@ var CSSTween = {
 */
 CSSTween.applyCSSTransition = function(obj){
 
+	//CSSTween.curAnims["anim"+CSSTween.counter] = obj;
+	CSSTween.curAnims[obj.elem.id] = obj;
 
-	CSSTween.curAnims["anim"+CSSTween.counter] = obj;
 	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
 	obj.elem.setAttribute('data-tweenEnd', 'false');
 	CSSTween.counter++;
-
-
 
 	CSSTween.tweenStyles = {
 			top: "",
@@ -36,14 +35,13 @@ CSSTween.applyCSSTransition = function(obj){
 			transform: "",
 			transitionTimingFunction: obj.ease,
 			transitionend: "",
-			transitionDelay: 0
+			transitionDelay: 0,
 	}
 	var transitProp = "";
 	var transformProp = "";
 
 	//this is the loop that replaces the styles with any changes
 	for(var i = 0; i < obj.attr.length;i++){
-
 		var curAttr = CSSTween.naming(obj, i);
 
 		if(!curAttr.transform){
@@ -69,29 +67,22 @@ CSSTween.applyCSSTransition = function(obj){
 		'transform',
 		'transitionDuration',
 		'transitionProperty',
-		'transitionTimingFunction'
+		'transitionTimingFunction',
 	], CSSTween.tweenStyles)
-
-	//obj.elem.style.webkitTransformOrigin = "top left";
 
 	//Apply the styles to the element
 	for(var prop in CSSTween.tweenStyles){
-
 		if(!CSSTween.tweenStyles[prop]){
 			CSSTween.tweenStyles[prop] = null;
 		}
-
-
 		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
 	}
-
 
 	//listen for transition complete && setup backup timer
 	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
 	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
 	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
 	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
-
 }
 
 /**
@@ -112,31 +103,31 @@ CSSTween.completeHandler = function(e){
 		srcElem.removeEventListener( 'transitionend', CSSTween.completeHandler, false );
 
 		var animNum = srcElem.getAttribute('data-tweenNum');
-		var onComplete = CSSTween.curAnims[animNum].onComplete;
+
+		var onComplete = CSSTween.curAnims[srcElem.id].onComplete;
 
 		CSSTween.transitionList = {}
 		var transitionArr = [
 			'transitionDelay',
-            'transitionDuration',
-            'transitionProperty',
-            'transitionTimingFunction'
+      'transitionDuration',
+      'transitionProperty',
+      'transitionTimingFunction'
 		]
-        CSSTween.vendorPrefix(transitionArr, CSSTween.transitionList)
-        for(var i=0;i<transitionArr.length;i++){
-            CSSTween.transitionList[transitionArr[i]] = "";
-        }
+    CSSTween.vendorPrefix(transitionArr, CSSTween.transitionList)
+    for(var i=0;i<transitionArr.length;i++){
+        CSSTween.transitionList[transitionArr[i]] = "";
+    }
 
-        //Apply the styles to the element
-        for(var prop in CSSTween.transitionList){
-            srcElem.style[prop] = "";
-        }
-
+    //Apply the styles to the element
+    for(var prop in CSSTween.transitionList){
+        srcElem.style[prop] = "";
+    }
 
 		if(onComplete){
-			onComplete.apply(this, CSSTween.curAnims[animNum].onCompleteParams);
+			onComplete.apply(this, CSSTween.curAnims[srcElem.id].onCompleteParams);
 		}
 
-		delete CSSTween.curAnims[animNum];
+		delete CSSTween.curAnims[srcElem.id];
 	}
 }
 
@@ -240,7 +231,7 @@ CSSEase = {
 	},	Back : {
 	  	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
 			easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-	//	easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+		easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
 	},	Bounce : { //NOT SUPPORTE
 	//	easeIn:
 	  	easeOut: 'cubic-bezier(0.765, 1.850, 0.235, 0.510)'

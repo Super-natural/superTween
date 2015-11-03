@@ -21,6 +21,7 @@ example:
 		rotate: 45,
 		opacity: 0.5,
 		ease: 'Linear.easeNone',
+		transformOrigin: "center center"
 		delay: 2,
 		onComplete: animationCompleteFunction,
 		onCompleteParams: ['stringToPassToFunction', 'anotherString']
@@ -65,13 +66,21 @@ Starts a tween with the given parameters as detailed below:
 			scaleX: Number,                         //X Scale
 			scaleY: Number,                         //Y Scale
 			delay: Number,                          //Animation delay (in seconds)
+			transformOrigin: String,								//What point to animate from
 			ease: String,         			//ease to use
 			onComplete: Function,    		//function called on complete
 			onCompleteParams: Array,        	//paramenters to pass to completion function
 		});
 
+
 ## superTween.killAll
 Stops all animation currently being handled by superTween
+
+## superTween.set
+Instantly sets an array of elements to a value
+This has an addition variable "display" which will set the display of an element to whatever you input
+
+App.superTween.set([elemW, elemX, elemY],	{x: 500, y: 500, display: "block"});
 
 ##superTween.run360
 Runs a 360 animation (see below for more)

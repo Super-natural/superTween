@@ -4,6 +4,9 @@ body {
 	background-color: #f2f2f2;
 }
 
+p{
+	margin: 0;
+}
 
 #appMain{
 	visibility: visible;
