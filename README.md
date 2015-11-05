@@ -33,8 +33,8 @@ example:
 		y: 500,
 	});
 
-	// to run a 360
-	superTween.run360(tweenMe, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
+	// to run a SuperLoop
+	superTween.superLoop(tweenMe, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
 ```
 
 This relies on the DOM object being absolutely positioned and runs off offsetLeft and offsetRight.
@@ -50,8 +50,8 @@ Robert Penner's easing equations.
 # Public Functions
 	superTween.to(elem, time, parameters);
 	superTween.killAll();
-	superTween.run360(elem, loops, parameters);
-	superTween.kill360(elem);
+	superTween.superLoop(elem, loops, parameters);
+	superTween.killSuperLoop(elem);
 
 ## superTween.to
 Starts a tween with the given parameters as detailed below:
@@ -82,17 +82,17 @@ This has an addition variable "display" which will set the display of an element
 ```
 App.superTween.set([elemW, elemX, elemY],	{x: 500, y: 500, display: "block"});
 ```
-##superTween.run360
-Runs a 360 animation (see below for more)
+##superTween.superLoop
+Runs a SuperLoop animation (see below for more)
 
-##superTween.kill360
-Kills a 360 on the given element
+##superTween.killSuperLoop
+Kills a SuperLoop on the given element
 
-# A look at 360s
+# A look at SuperLoops
 These are a custom fix to create more engaging videos on devices that do not allow autoplaying video. It requires a spritesheet of frames stitched together vertically. The superTween command that launches one of these incrementally jumps the image a set distance on a specified interval allowing a short preview of a video the be autoplayed and looped for a more engaging experience.
 The object parameters are as follows:
 ```
-	superTween.run360(
+	superTween.superLoop(
 		elem:HTMLElement, 		//html element containing image as bg image
 		loops:Number, 			//number of loops or 'infinite'
 		{
