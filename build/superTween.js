@@ -1,4 +1,4 @@
-/*! SuperTween version 0.4.1. Created 27-10-2015 */
+/*! SuperTween version 0.4.3. Created 05-11-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -16,6 +16,7 @@
 
  var superTween = {
      fn: {},
+     delayed: [],
      useCSS: false,
      availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
 };
@@ -41,7 +42,6 @@ superTween.init = function(){
     if( superTween.useCSS === false ) {
         featurenameCapital = "Transition";
         for( var i = 0; i < domPrefixes.length; i++ ) {
-        //    console.dir(elem.style[domPrefixes[i] + featurenameCapital ]);
             if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
                 superTween.useCSS = true;
               break;
@@ -69,6 +69,18 @@ superTween.killSuperLoop = function(elem){
 }
 
 
+
+/**
+ * This willl eventually be the delay loop rather than relying on css timer
+ * and js loop as then we can have TODO overwrite=true/false functionality
+*/
+superTween.delayLoop = function(){
+  console.log("delayLoop");
+}
+
+
+
+
 /**
  * @param elem: element to be tweened
  * @param time: length of animation
@@ -79,37 +91,47 @@ superTween.killSuperLoop = function(elem){
  *			ease: ease to use for tween
 */
 superTween.to = function(elem, time, obj){
-    /*
-    if(obj.useJS){
-        superTween.useCSS = false;
-    }
-    */
+  //  superTween.useCSS = false;
 
-	time = time*1000;
+  time = time*1000;
 	obj.delay = obj.delay*1000;
-    var newTween = superTween.fn.setupTween(elem, time, obj);
 
+  if (elem.style){
+    elem.style.transformOrigin = obj.transformOrigin || "50% 50%";
+    elem.style.webkitTransformOrigin = obj.transformOrigin || "50% 50%";
+    elem.style.mozTransformOrigin = obj.transformOrigin || "50% 50%";
+  }
 
-/*
-   elem.style.msTransformOrigin = '0';
-   elem.style.webkitTransformOrigin = '0';
-   elem.style.transformOrigin = '0';
-*/
+  var newTween = superTween.fn.setupTween(elem, time, obj);
 
-    //If the CSS plugin is available as well as supported by browser, use CSS
-    if(superTween.useCSS && CSSTween){
+  //If the CSS plugin is available as well as supported by browser, use CSS
+  if(superTween.useCSS && CSSTween){
+      CSSTween.applyCSSTransition(newTween);
+  } else {
 
-        CSSTween.applyCSSTransition(newTween);
+    JSTween.curAnims.push(newTween);
 
-    } else {
-
-        JSTween.curAnims.push(newTween);
-
-    	if(!JSTween.loopTimer){
-            JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
-    	}
-    }
+  	if(!JSTween.loopTimer){
+      JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+  	}
+  }
 }
+
+
+
+/**
+ * @param arr: an array of elements to be set
+ * @param values to be set
+*/
+superTween.set = function(arr, obj){
+	for(var i = 0; i < arr.length; i++){
+    for(var effect in obj){
+      var e = {attr: effect}
+      JSTween.setPos(arr[i], e, obj[effect]);
+    }
+  }
+}
+
 
 /*
  * Kills all active Tweens
@@ -124,7 +146,6 @@ superTween.killAll = function(){
         }
     }
 
-
     if(superLoop){
         superLoop.killAllSuperLoop()
     }
@@ -138,37 +159,39 @@ superTween.killAll = function(){
  * @param obj: object containing all the tween variables
 */
 superTween.fn.setupTween = function(elem, time, obj){
+  //set a default ease
 	if(!obj.ease){obj.ease = 'Sine.easeInOut'}
 
-    var easeEx = obj.ease.split(".");
-    var chosenEase = "";
+  var easeEx = obj.ease.split(".");
+  var chosenEase = "";
 
-    if(superTween.useCSS){
-        chosenEase = CSSEase[easeEx[0]][easeEx[1]]
-    } else{
-        chosenEase = JSEase[easeEx[0]][easeEx[1]]
-    }
+  if(superTween.useCSS){
+      chosenEase = CSSEase[easeEx[0]][easeEx[1]]
+  } else{
+      chosenEase = JSEase[easeEx[0]][easeEx[1]]
+  }
 
-
+  //make core tween obj, this applise to both CSS and JS
 	var tweenObj = {
-		attr: superTween.fn.getAttr(elem, obj),       //attribute(s) changing for the element
-        elem: elem,                                   //element under question
-		ease: chosenEase,                             //ease to use for the tween
+		attr: superTween.fn.getAttr(elem, obj),           //attribute(s) changing for the element
+    elem: elem,                                       //element under question
+		ease: chosenEase,                                 //ease to use for the tween
 
-        rawObj: obj,                                  //the raw object called in the timeline (for CSS)
-        rawTime: time,                                //the raw time (for CSS)
-        rawDelay:obj.delay,                           //raw delay amt, (for CSS)
+    rawObj: obj,                                      //the raw object called in the timeline (for CSS)
+    rawTime: time,                                    //the raw time (for CSS)
+    rawDelay:obj.delay,                               //raw delay amt, (for CSS)
 
-        d: Math.floor(time/JSTween.updateRate),       //variable used in penners equations within the JS eases, duration in steps
+    d: Math.floor(time/JSTween.updateRate),           //variable used in penners equations within the JS eases, duration in steps
 		delaySteps: Math.floor(obj.delay/JSTween.updateRate), //amount of steps to delay the animation (JS)
 
-        curDel: false,                                //whether or not the tween is currently affected by a delay
-        curDelStep: 0,                                //current step the delay timer is on
+    curDel: false,                                    //whether or not the tween is currently affected by a delay
+    curDelStep: 0,                                    //current step the delay timer is on
 
-        t: 0,                                         //variable used in penners equations, current step of the tween
+    t: 0,                                             //variable used in penners equations, current step of the tween
 
-		onComplete: obj.onComplete,                   //oncomplete function
-		onCompleteParams: obj.onCompleteParams        //oncomplete function parameters
+		onComplete: obj.onComplete,                       //oncomplete function
+		onCompleteParams: obj.onCompleteParams,           //oncomplete function parameters
+
 	}
 	if(tweenObj.delaySteps > 0){
 		tweenObj.curDel = true;
@@ -186,17 +209,28 @@ superTween.fn.getAttr = function(elem, obj){
 	for (var i=0;i<superTween.availAttr.length;i++){
 
 		var curSearch = superTween.availAttr[i];
+		var newObj = {}
+		   	newObj.attr = superTween.availAttr[i];
 
 		if(obj[curSearch] !== null && obj[curSearch] !== undefined ){
-
-			var newObj = {}
-			   	newObj.attr = superTween.availAttr[i];
 			   	newObj.b = superTween.fn.getPos(elem, newObj.attr, obj[newObj.attr]);
 			   	newObj.c = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], newObj.b, elem);
 
 			returnVar.push(newObj);
 		}
+    else {
+      if (curSearch === "x" || curSearch === "y"){
+        newObj.b = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], 0, elem);
+        newObj.c = newObj.b;
+
+  			returnVar.push(newObj);
+      }
+    }
+
 	}
+
+  //console.log(returnVar)
+
 	return returnVar;
 }
 
@@ -236,7 +270,8 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 		case 'opacity' :
 			if('getComputedStyle' in  window){
 				return parseInt(window.getComputedStyle(elem, null).getPropertyValue("opacity"));
-			} else {
+			}
+      else {
 				if(backupVal > 0){return 0}
 							else {return 1}
 			}
@@ -292,7 +327,6 @@ superTween.fn.getTarg = function(attr, targ, orig, elem){
 		return ((targ * elem.getAttribute('data-startW')-orig))
 	} else if (attr == 'scaleY'){
 		return ((targ * elem.getAttribute('data-startH')-orig))
-
 	}
 }
 
@@ -301,20 +335,25 @@ superTween.fn.getTarg = function(attr, targ, orig, elem){
  * The 'onUpdate' loop run if it it a JS tween
 */
 JSTween.tweenLoop = function(){
-    var anims = JSTween.curAnims;
+  var anims = JSTween.curAnims;
 	for (i = 0; i < anims.length; i++){
 		if(!anims[i].curDel){
+
+      anims[i].elem.style.transformOrigin = anims[i].transformOrigin;
+      anims[i].elem.style.webkitTransformOrigin = anims[i].transformOrigin;
+      anims[i].elem.style.MozTransformOrigin = anims[i].transformOrigin;
+
 			for(var j = 0; j < anims[i].attr.length; j++){
 
 				var passObj = {
 					t:	anims[i].t,
 					d:	anims[i].d,
 					b: 	anims[i].attr[j].b,
-					c: 	anims[i].attr[j].c //- anims[i].attr[j].b
+					c: 	anims[i].attr[j].c
 				}
 
 				var newVal = anims[i].ease(passObj);
-          JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
+        JSTween.setPos(anims[i].elem, anims[i].attr[j], newVal);
 			}
 
 			anims[i].t ++;
@@ -376,7 +415,7 @@ JSTween.setPos = function(elem, obj, val){
 			break;
 
 		case 'opacity' :
-			elem.style.opacity = val;
+			elem.style.opacity = val + "";
 
 			//IE8 Opacity fix
 			if ('filters' in elem){
@@ -392,7 +431,12 @@ JSTween.setPos = function(elem, obj, val){
 			elem.style.msTransform     = 'rotate('+val+'deg)';
 			elem.style.oTransform      = 'rotate('+val+'deg)';
 			elem.style.transform       = 'rotate('+val+'deg)';
+
 			break;
+
+    case 'display' :
+      elem.style.display = val;
+      break;
 	}
 }
 
@@ -519,7 +563,7 @@ var JSEase = {
     				if (s == undefined) s = 1.70158;
     				return ob.c*(ob.t/=ob.d)*ob.t*((s+1)*ob.t - s) + ob.b;
     			},		//*/
-    /*	easeInOut: function (ob, s) {
+    	easeInOut: function (ob, s) {
     				if (s == undefined) s = 1.70158;
     				if ((ob.t/=ob.d/2) < 1) return ob.c/2*(ob.t*ob.t*(((s*=(1.525))+1)*ob.t - s)) + ob.b;
     				return ob.c/2*((ob.t-=2)*ob.t*(((s*=(1.525))+1)*ob.t + s) + 2) + ob.b;
@@ -598,81 +642,77 @@ var CSSTween = {
 */
 CSSTween.applyCSSTransition = function(obj){
 
+	//CSSTween.curAnims["anim"+CSSTween.counter] = obj;
+  var ref = obj.elem.id || "anim"+CSSTween.counter;
+	CSSTween.curAnims[ref] = obj;
 
-	CSSTween.curAnims["anim"+CSSTween.counter] = obj;
-	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
-	obj.elem.setAttribute('data-tweenEnd', 'false');
-	CSSTween.counter++;
-
-
-
-	CSSTween.tweenStyles = {
-			top: "",
-			left: "",
-			width: "",
-			height: "",
-			opacity: "",
-			transitionDuration: "",
-			transitionProperty: "",
-			transform: "",
-			transitionTimingFunction: obj.ease,
-			transitionend: "",
-			transitionDelay: 0
-	}
-	var transitProp = "";
-	var transformProp = "";
-
-	//this is the loop that replaces the styles with any changes
-	for(var i = 0; i < obj.attr.length;i++){
-
-		var curAttr = CSSTween.naming(obj, i);
-
-		if(!curAttr.transform){
-			CSSTween.tweenStyles[curAttr.cssVar] = curAttr.value;
-		} else {
-			transformProp = curAttr.transform + " "+transformProp;
-		}
-		transitProp += curAttr.cssVar+", ";
-	}
-
-	CSSTween.tweenStyles.transform = transformProp;
-	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
-	CSSTween.tweenStyles.transitionProperty = transitProp;
-
-	if(obj.rawDelay){
-		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
-	} else {
-		CSSTween.tweenStyles.transitionDelay = '0s';
-	}
-
-	CSSTween.vendorPrefix([
-		'transitionDelay',
-		'transform',
-		'transitionDuration',
-		'transitionProperty',
-		'transitionTimingFunction'
-	], CSSTween.tweenStyles)
-
-	//obj.elem.style.webkitTransformOrigin = "top left";
-
-	//Apply the styles to the element
-	for(var prop in CSSTween.tweenStyles){
-
-		if(!CSSTween.tweenStyles[prop]){
-			CSSTween.tweenStyles[prop] = null;
-		}
+  if (typeof obj.elem === "object"){
+  	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
+  	obj.elem.setAttribute('data-tweenEnd', 'false');
 
 
-		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
-	}
+  	CSSTween.counter++;
 
+  	CSSTween.tweenStyles = {
+  			top: "",
+  			left: "",
+  			width: "",
+  			height: "",
+  			opacity: "",
+  			transitionDuration: "",
+  			transitionProperty: "",
+  			transform: "",
+  			transitionTimingFunction: obj.ease,
+  			transitionend: "",
+  			transitionDelay: 0,
+  	}
+  	var transitProp = "";
+  	var transformProp = "";
 
-	//listen for transition complete && setup backup timer
-	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
+  	//this is the loop that replaces the styles with any changes
+  	for(var i = 0; i < obj.attr.length;i++){
+  		var curAttr = CSSTween.naming(obj, i);
 
+  		if(!curAttr.transform){
+  			CSSTween.tweenStyles[curAttr.cssVar] = curAttr.value;
+  		} else {
+  			transformProp = curAttr.transform + " "+transformProp;
+  		}
+  		transitProp += curAttr.cssVar+", ";
+  	}
+
+  	CSSTween.tweenStyles.transform = transformProp;
+  	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
+  	CSSTween.tweenStyles.transitionProperty = transitProp;
+
+  	if(obj.rawDelay){
+  		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
+  	} else {
+  		CSSTween.tweenStyles.transitionDelay = '0s';
+  	}
+
+  	CSSTween.vendorPrefix([
+  		'transitionDelay',
+  		'transform',
+  		'transitionDuration',
+  		'transitionProperty',
+  		'transitionTimingFunction',
+  	], CSSTween.tweenStyles)
+
+  	//Apply the styles to the element
+  	for(var prop in CSSTween.tweenStyles){
+  		if(!CSSTween.tweenStyles[prop] && CSSTween.tweenStyles[prop] !== 0){
+  			CSSTween.tweenStyles[prop] = null;
+  		}
+  		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
+  	}
+
+  	//listen for transition complete && setup backup timer
+  	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
+  }
 }
 
 /**
@@ -693,31 +733,33 @@ CSSTween.completeHandler = function(e){
 		srcElem.removeEventListener( 'transitionend', CSSTween.completeHandler, false );
 
 		var animNum = srcElem.getAttribute('data-tweenNum');
-		var onComplete = CSSTween.curAnims[animNum].onComplete;
+
+    if (srcElem.id){
+		    var onComplete = CSSTween.curAnims[srcElem.id].onComplete;
+    }
 
 		CSSTween.transitionList = {}
 		var transitionArr = [
 			'transitionDelay',
-            'transitionDuration',
-            'transitionProperty',
-            'transitionTimingFunction'
+      'transitionDuration',
+      'transitionProperty',
+      'transitionTimingFunction'
 		]
-        CSSTween.vendorPrefix(transitionArr, CSSTween.transitionList)
-        for(var i=0;i<transitionArr.length;i++){
-            CSSTween.transitionList[transitionArr[i]] = "";
-        }
+    CSSTween.vendorPrefix(transitionArr, CSSTween.transitionList)
+    for(var i=0;i<transitionArr.length;i++){
+        CSSTween.transitionList[transitionArr[i]] = "";
+    }
 
-        //Apply the styles to the element
-        for(var prop in CSSTween.transitionList){
-            srcElem.style[prop] = "";
-        }
-
+    //Apply the styles to the element
+    for(var prop in CSSTween.transitionList){
+        srcElem.style[prop] = "";
+    }
 
 		if(onComplete){
-			onComplete.apply(this, CSSTween.curAnims[animNum].onCompleteParams);
+			onComplete.apply(this, CSSTween.curAnims[srcElem.id].onCompleteParams);
 		}
 
-		delete CSSTween.curAnims[animNum];
+		delete CSSTween.curAnims[srcElem.id];
 	}
 }
 
@@ -821,7 +863,7 @@ CSSEase = {
 	},	Back : {
 	  	easeIn: 'cubic-bezier(0.6, -0.28, 0.735, 0.045)',
 			easeOut: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-	//	easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+		easeInOut: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
 	},	Bounce : { //NOT SUPPORTE
 	//	easeIn:
 	  	easeOut: 'cubic-bezier(0.765, 1.850, 0.235, 0.510)'

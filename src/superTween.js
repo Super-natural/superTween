@@ -15,6 +15,7 @@
 
  var superTween = {
      fn: {},
+     delayed: [],
      useCSS: false,
      availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
 };
@@ -40,7 +41,6 @@ superTween.init = function(){
     if( superTween.useCSS === false ) {
         featurenameCapital = "Transition";
         for( var i = 0; i < domPrefixes.length; i++ ) {
-        //    console.dir(elem.style[domPrefixes[i] + featurenameCapital ]);
             if( elem.style[domPrefixes[i] + featurenameCapital ] !== undefined ) {
                 superTween.useCSS = true;
               break;
@@ -95,9 +95,11 @@ superTween.to = function(elem, time, obj){
   time = time*1000;
 	obj.delay = obj.delay*1000;
 
-  elem.style.transformOrigin = obj.transformOrigin || "50% 50%";
-  elem.style.webkitTransformOrigin = obj.transformOrigin || "50% 50%";
-  elem.style.mozTransformOrigin = obj.transformOrigin || "50% 50%";
+  if (elem.style){
+    elem.style.transformOrigin = obj.transformOrigin || "50% 50%";
+    elem.style.webkitTransformOrigin = obj.transformOrigin || "50% 50%";
+    elem.style.mozTransformOrigin = obj.transformOrigin || "50% 50%";
+  }
 
   var newTween = superTween.fn.setupTween(elem, time, obj);
 
@@ -114,6 +116,12 @@ superTween.to = function(elem, time, obj){
   }
 }
 
+
+
+/**
+ * @param arr: an array of elements to be set
+ * @param values to be set
+*/
 superTween.set = function(arr, obj){
 	for(var i = 0; i < arr.length; i++){
     for(var effect in obj){
@@ -136,7 +144,6 @@ superTween.killAll = function(){
             CSSTween.curAnims[anim].elem.style[prop] = null;
         }
     }
-
 
     if(superLoop){
         superLoop.killAllSuperLoop()
@@ -217,12 +224,6 @@ superTween.fn.getAttr = function(elem, obj){
 
   			returnVar.push(newObj);
       }
-      // else if (curSearch === "scaleX" || curSearch === "scaleY") {
-      //   newObj.b = superTween.fn.getPos(elem, newObj.attr, obj[newObj.attr]);
-      //   newObj.c = newObj.b;
-      //
-  		// 	returnVar.push(newObj);
-      // }
     }
 
 	}
@@ -268,7 +269,8 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 		case 'opacity' :
 			if('getComputedStyle' in  window){
 				return parseInt(window.getComputedStyle(elem, null).getPropertyValue("opacity"));
-			} else {
+			}
+      else {
 				if(backupVal > 0){return 0}
 							else {return 1}
 			}
@@ -412,7 +414,7 @@ JSTween.setPos = function(elem, obj, val){
 			break;
 
 		case 'opacity' :
-			elem.style.opacity = val;
+			elem.style.opacity = val + "";
 
 			//IE8 Opacity fix
 			if ('filters' in elem){

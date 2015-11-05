@@ -18,71 +18,76 @@ var CSSTween = {
 CSSTween.applyCSSTransition = function(obj){
 
 	//CSSTween.curAnims["anim"+CSSTween.counter] = obj;
-	CSSTween.curAnims[obj.elem.id] = obj;
+  var ref = obj.elem.id || "anim"+CSSTween.counter;
+	CSSTween.curAnims[ref] = obj;
 
-	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
-	obj.elem.setAttribute('data-tweenEnd', 'false');
-	CSSTween.counter++;
+  if (typeof obj.elem === "object"){
+  	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
+  	obj.elem.setAttribute('data-tweenEnd', 'false');
 
-	CSSTween.tweenStyles = {
-			top: "",
-			left: "",
-			width: "",
-			height: "",
-			opacity: "",
-			transitionDuration: "",
-			transitionProperty: "",
-			transform: "",
-			transitionTimingFunction: obj.ease,
-			transitionend: "",
-			transitionDelay: 0,
-	}
-	var transitProp = "";
-	var transformProp = "";
 
-	//this is the loop that replaces the styles with any changes
-	for(var i = 0; i < obj.attr.length;i++){
-		var curAttr = CSSTween.naming(obj, i);
+  	CSSTween.counter++;
 
-		if(!curAttr.transform){
-			CSSTween.tweenStyles[curAttr.cssVar] = curAttr.value;
-		} else {
-			transformProp = curAttr.transform + " "+transformProp;
-		}
-		transitProp += curAttr.cssVar+", ";
-	}
+  	CSSTween.tweenStyles = {
+  			top: "",
+  			left: "",
+  			width: "",
+  			height: "",
+  			opacity: "",
+  			transitionDuration: "",
+  			transitionProperty: "",
+  			transform: "",
+  			transitionTimingFunction: obj.ease,
+  			transitionend: "",
+  			transitionDelay: 0,
+  	}
+  	var transitProp = "";
+  	var transformProp = "";
 
-	CSSTween.tweenStyles.transform = transformProp;
-	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
-	CSSTween.tweenStyles.transitionProperty = transitProp;
+  	//this is the loop that replaces the styles with any changes
+  	for(var i = 0; i < obj.attr.length;i++){
+  		var curAttr = CSSTween.naming(obj, i);
 
-	if(obj.rawDelay){
-		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
-	} else {
-		CSSTween.tweenStyles.transitionDelay = '0s';
-	}
+  		if(!curAttr.transform){
+  			CSSTween.tweenStyles[curAttr.cssVar] = curAttr.value;
+  		} else {
+  			transformProp = curAttr.transform + " "+transformProp;
+  		}
+  		transitProp += curAttr.cssVar+", ";
+  	}
 
-	CSSTween.vendorPrefix([
-		'transitionDelay',
-		'transform',
-		'transitionDuration',
-		'transitionProperty',
-		'transitionTimingFunction',
-	], CSSTween.tweenStyles)
+  	CSSTween.tweenStyles.transform = transformProp;
+  	CSSTween.tweenStyles.transitionDuration = (obj.rawTime/1000)+'s';
+  	CSSTween.tweenStyles.transitionProperty = transitProp;
 
-	//Apply the styles to the element
-	for(var prop in CSSTween.tweenStyles){
-		if(!CSSTween.tweenStyles[prop]){
-			CSSTween.tweenStyles[prop] = null;
-		}
-		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
-	}
+  	if(obj.rawDelay){
+  		CSSTween.tweenStyles.transitionDelay = (obj.rawDelay/1000)+'s';
+  	} else {
+  		CSSTween.tweenStyles.transitionDelay = '0s';
+  	}
 
-	//listen for transition complete && setup backup timer
-	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
-	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
+  	CSSTween.vendorPrefix([
+  		'transitionDelay',
+  		'transform',
+  		'transitionDuration',
+  		'transitionProperty',
+  		'transitionTimingFunction',
+  	], CSSTween.tweenStyles)
+
+  	//Apply the styles to the element
+  	for(var prop in CSSTween.tweenStyles){
+  		if(!CSSTween.tweenStyles[prop] && CSSTween.tweenStyles[prop] !== 0){
+  			CSSTween.tweenStyles[prop] = null;
+  		}
+  		obj.elem.style[prop] = CSSTween.tweenStyles[prop];
+  	}
+
+  	//listen for transition complete && setup backup timer
+  	obj.elem.addEventListener( 'webkitTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'mozTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'msTransitionEnd', CSSTween.completeHandler, false );
+  	obj.elem.addEventListener( 'transitionend', CSSTween.completeHandler, false );
+  }
 }
 
 /**
@@ -104,7 +109,9 @@ CSSTween.completeHandler = function(e){
 
 		var animNum = srcElem.getAttribute('data-tweenNum');
 
-		var onComplete = CSSTween.curAnims[srcElem.id].onComplete;
+    if (srcElem.id){
+		    var onComplete = CSSTween.curAnims[srcElem.id].onComplete;
+    }
 
 		CSSTween.transitionList = {}
 		var transitionArr = [
