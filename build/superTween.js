@@ -1,4 +1,4 @@
-/*! SuperTween version 0.4.3. Created 05-11-2015 */
+/*! SuperTween version 0.4.3. Created 06-11-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -92,28 +92,29 @@ superTween.delayLoop = function(){
 */
 superTween.to = function(elem, time, obj){
   //  superTween.useCSS = false;
+  if (typeof elem === "object"){
+    time = time*1000;
+  	obj.delay = obj.delay*1000;
 
-  time = time*1000;
-	obj.delay = obj.delay*1000;
+    if (elem.style){
+      elem.style.transformOrigin = obj.transformOrigin || "50% 50%";
+      elem.style.webkitTransformOrigin = obj.transformOrigin || "50% 50%";
+      elem.style.mozTransformOrigin = obj.transformOrigin || "50% 50%";
+    }
 
-  if (elem.style){
-    elem.style.transformOrigin = obj.transformOrigin || "50% 50%";
-    elem.style.webkitTransformOrigin = obj.transformOrigin || "50% 50%";
-    elem.style.mozTransformOrigin = obj.transformOrigin || "50% 50%";
-  }
+    var newTween = superTween.fn.setupTween(elem, time, obj);
 
-  var newTween = superTween.fn.setupTween(elem, time, obj);
+    //If the CSS plugin is available as well as supported by browser, use CSS
+    if(superTween.useCSS && CSSTween){
+        CSSTween.applyCSSTransition(newTween);
+    } else {
 
-  //If the CSS plugin is available as well as supported by browser, use CSS
-  if(superTween.useCSS && CSSTween){
-      CSSTween.applyCSSTransition(newTween);
-  } else {
+      JSTween.curAnims.push(newTween);
 
-    JSTween.curAnims.push(newTween);
-
-  	if(!JSTween.loopTimer){
-      JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
-  	}
+    	if(!JSTween.loopTimer){
+        JSTween.loopTimer = setTimeout(JSTween.tweenLoop, JSTween.updateRate);
+    	}
+    }
   }
 }
 
@@ -338,11 +339,11 @@ JSTween.tweenLoop = function(){
   var anims = JSTween.curAnims;
 	for (i = 0; i < anims.length; i++){
 		if(!anims[i].curDel){
-
-      anims[i].elem.style.transformOrigin = anims[i].transformOrigin;
-      anims[i].elem.style.webkitTransformOrigin = anims[i].transformOrigin;
-      anims[i].elem.style.MozTransformOrigin = anims[i].transformOrigin;
-
+      if (anims[i].elem.style){
+        anims[i].elem.style.transformOrigin = anims[i].transformOrigin;
+        anims[i].elem.style.webkitTransformOrigin = anims[i].transformOrigin;
+        anims[i].elem.style.MozTransformOrigin = anims[i].transformOrigin;
+      }
 			for(var j = 0; j < anims[i].attr.length; j++){
 
 				var passObj = {
