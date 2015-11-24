@@ -12,12 +12,13 @@ example:
 	// get a dom element
 	var tweenMe = document.getElementById('elementToAnimate);
 
-	// to run a complicated tween
+	// to run a complicated tween (this one has interfering variables but shows what you can affect)
 	superTween.to(tweenMe, 4, {
 		x: 300,
 		y:500,
 		scaleY: 0.5,
 		scaleX: 2,
+		scale: 2,
 		width: 500,
 		height: 250,
 		rotate: 45,
@@ -67,6 +68,7 @@ Starts a tween with the given parameters as detailed below:
 			y: Number,                              //distance to move on y axis (in pixels)
 			scaleX: Number,                         //X Scale
 			scaleY: Number,                         //Y Scale
+			scale: Number, 													//A combined scale variant
 			width: Number,													//Height (in pixels)
 			height: Number,													//Width (in pixels)
 			delay: Number,                          //Animation delay (in seconds)

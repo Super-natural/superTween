@@ -91,7 +91,7 @@ superTween.delayLoop = function(){
  *			ease: ease to use for tween
 */
 superTween.to = function(elem, time, obj){
-  //  superTween.useCSS = false;
+   superTween.useCSS = false;
   if (typeof elem === "object"){
     time = time*1000;
   	obj.delay = obj.delay*1000;
@@ -170,6 +170,12 @@ superTween.fn.setupTween = function(elem, time, obj){
       chosenEase = CSSEase[easeEx[0]][easeEx[1]]
   } else{
       chosenEase = JSEase[easeEx[0]][easeEx[1]]
+  }
+
+
+  if (obj.scale){
+    obj.scaleX = obj.scale;
+    obj.scaleY = obj.scale;
   }
 
 

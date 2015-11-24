@@ -32,7 +32,7 @@ App.timeline.doStep = function(whatStep){
 
 			// App.superTween.to(App.dom.elemW, 1, {rotate: 45, ease: 'Bounce.easeOut'});
 			App.superTween.to(App.dom.elemW, 1, {width: 300, height:300, scaleY: 0.5, scaleX: 2, ease: 'Bounce.easeOut'});
-			App.superTween.to(App.dom.elemX, 1, {y:400, scaleX: 2, rotate: 45, ease: 'Bounce.easeOut', delay: 0.5});
+			App.superTween.to(App.dom.elemX, 1, {y:400, scale: 2, rotate: 45, ease: 'Bounce.easeOut', delay: 0.5});
 			 App.superTween.to(App.dom.elemY, 1, {x: 300, scaleY: 0.5, scaleX: 2, rotate: 45, ease: 'Bounce.easeOut', delay: 1,
 			 										onComplete: App.utils.goTo,
 			 										onCompleteParams: [1]});
