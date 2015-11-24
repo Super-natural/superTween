@@ -1,4 +1,4 @@
-/*! SuperTween version 0.4.3. Created 06-11-2015 */
+/*! SuperTween version 0.4.3. Created 24-11-2015 */
 /*
  * Super natural's micro Tween Engine
  * http://www.wearesupernatural.com/
@@ -18,7 +18,7 @@
      fn: {},
      delayed: [],
      useCSS: false,
-     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
+     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'scale', 'rotate', 'width', 'height'] //currently animatable attributes
 };
 
 
@@ -54,9 +54,9 @@ superTween.init = function(){
  * Triggers the 360 funtions, a breakdown of params is found in the plugin
 */
 superTween.superLoop = function(elem, loops, obj){
-    if(superLoop){
-        superLoop.runSuperLoop(elem, loops, obj);
-    }
+  if(superLoop){
+    superLoop.runSuperLoop(elem, loops, obj);
+  }
 }
 
 /*
@@ -172,6 +172,7 @@ superTween.fn.setupTween = function(elem, time, obj){
       chosenEase = JSEase[easeEx[0]][easeEx[1]]
   }
 
+
   //make core tween obj, this applise to both CSS and JS
 	var tweenObj = {
 		attr: superTween.fn.getAttr(elem, obj),           //attribute(s) changing for the element
@@ -220,18 +221,15 @@ superTween.fn.getAttr = function(elem, obj){
 			returnVar.push(newObj);
 		}
     else {
-      if (curSearch === "x" || curSearch === "y"){
+      if (curSearch === "x" || curSearch === "y" || curSearch === "width" || curSearch === "height"){
         newObj.b = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], 0, elem);
         newObj.c = newObj.b;
 
   			returnVar.push(newObj);
       }
     }
-
 	}
-
-  //console.log(returnVar)
-
+  // console.log(returnVar)
 	return returnVar;
 }
 
@@ -250,6 +248,14 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 
 		case 'y' :
 			return elem.offsetTop;
+			break;
+
+		case 'width' :
+			return elem.offsetWidth;
+			break;
+
+		case 'height' :
+			return elem.offsetHeight;
 			break;
 
 		case 'scaleX' :
@@ -322,7 +328,7 @@ superTween.fn.getPos = function(elem, attr, backupVal){
  *  @param elem: element under question
  */
 superTween.fn.getTarg = function(attr, targ, orig, elem){
-	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
+	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate' || attr == 'width' || attr == 'height'){
 		return targ - orig;
 	} else if(attr == 'scaleX'){
 		return ((targ * elem.getAttribute('data-startW')-orig))
@@ -406,9 +412,16 @@ JSTween.setPos = function(elem, obj, val){
 			elem.style.top = val + "px";
 			break;
 
+		case 'width' :
+			elem.style.width = val + "px";
+			break;
+
+		case 'height' :
+			elem.style.height = val + "px";
+			break;
+
 		case 'scaleX' :
 			elem.style.width = val + "px";
-
 			break;
 
 		case 'scaleY' :
@@ -651,7 +664,6 @@ CSSTween.applyCSSTransition = function(obj){
   	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
   	obj.elem.setAttribute('data-tweenEnd', 'false');
 
-
   	CSSTween.counter++;
 
   	CSSTween.tweenStyles = {
@@ -784,12 +796,14 @@ CSSTween.naming = function(parObj, unit){
 	}
 
 	if (obj.attr == 'x'||
-		obj.attr == 'y'||
-		obj.attr == 'width'||
-		obj.attr == 'height'){
+			obj.attr == 'y'||
+			obj.attr == 'width'||
+			obj.attr == 'height'){
 
 			if(obj.attr == 'x'){r.cssVar = "left"}
 			if(obj.attr == 'y'){r.cssVar = "top"}
+			if(obj.attr == 'width'){r.cssVar = "width"}
+			if(obj.attr == 'height'){r.cssVar = "height"}
 
 			r.value += "px";
 
@@ -804,7 +818,7 @@ CSSTween.naming = function(parObj, unit){
 
 
 	} else if (	obj.attr == 'scaleX' ||
-				obj.attr == 'scaleY'){
+							obj.attr == 'scaleY') {
 
 		var newScale = parObj.rawObj[obj.attr];
 		r.transform = obj.attr+"("+newScale+")"

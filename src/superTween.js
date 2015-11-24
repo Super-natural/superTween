@@ -17,7 +17,7 @@
      fn: {},
      delayed: [],
      useCSS: false,
-     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'rotate'] //currently animatable attributes
+     availAttr: ['opacity', 'x', 'y', 'scaleY', 'scaleX', 'scale', 'rotate', 'width', 'height'] //currently animatable attributes
 };
 
 
@@ -53,9 +53,9 @@ superTween.init = function(){
  * Triggers the 360 funtions, a breakdown of params is found in the plugin
 */
 superTween.superLoop = function(elem, loops, obj){
-    if(superLoop){
-        superLoop.runSuperLoop(elem, loops, obj);
-    }
+  if(superLoop){
+    superLoop.runSuperLoop(elem, loops, obj);
+  }
 }
 
 /*
@@ -171,6 +171,7 @@ superTween.fn.setupTween = function(elem, time, obj){
       chosenEase = JSEase[easeEx[0]][easeEx[1]]
   }
 
+
   //make core tween obj, this applise to both CSS and JS
 	var tweenObj = {
 		attr: superTween.fn.getAttr(elem, obj),           //attribute(s) changing for the element
@@ -219,18 +220,15 @@ superTween.fn.getAttr = function(elem, obj){
 			returnVar.push(newObj);
 		}
     else {
-      if (curSearch === "x" || curSearch === "y"){
+      if (curSearch === "x" || curSearch === "y" || curSearch === "width" || curSearch === "height"){
         newObj.b = superTween.fn.getTarg(newObj.attr, obj[newObj.attr], 0, elem);
         newObj.c = newObj.b;
 
   			returnVar.push(newObj);
       }
     }
-
 	}
-
-  //console.log(returnVar)
-
+  // console.log(returnVar)
 	return returnVar;
 }
 
@@ -249,6 +247,14 @@ superTween.fn.getPos = function(elem, attr, backupVal){
 
 		case 'y' :
 			return elem.offsetTop;
+			break;
+
+		case 'width' :
+			return elem.offsetWidth;
+			break;
+
+		case 'height' :
+			return elem.offsetHeight;
 			break;
 
 		case 'scaleX' :
@@ -321,7 +327,7 @@ superTween.fn.getPos = function(elem, attr, backupVal){
  *  @param elem: element under question
  */
 superTween.fn.getTarg = function(attr, targ, orig, elem){
-	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate'){
+	if(attr == 'x' || attr == 'y' || attr == 'opacity' || attr == 'rotate' || attr == 'width' || attr == 'height'){
 		return targ - orig;
 	} else if(attr == 'scaleX'){
 		return ((targ * elem.getAttribute('data-startW')-orig))
@@ -405,9 +411,16 @@ JSTween.setPos = function(elem, obj, val){
 			elem.style.top = val + "px";
 			break;
 
+		case 'width' :
+			elem.style.width = val + "px";
+			break;
+
+		case 'height' :
+			elem.style.height = val + "px";
+			break;
+
 		case 'scaleX' :
 			elem.style.width = val + "px";
-
 			break;
 
 		case 'scaleY' :

@@ -25,7 +25,6 @@ CSSTween.applyCSSTransition = function(obj){
   	obj.elem.setAttribute('data-tweenNum', "anim"+CSSTween.counter);
   	obj.elem.setAttribute('data-tweenEnd', 'false');
 
-
   	CSSTween.counter++;
 
   	CSSTween.tweenStyles = {
@@ -158,12 +157,14 @@ CSSTween.naming = function(parObj, unit){
 	}
 
 	if (obj.attr == 'x'||
-		obj.attr == 'y'||
-		obj.attr == 'width'||
-		obj.attr == 'height'){
+			obj.attr == 'y'||
+			obj.attr == 'width'||
+			obj.attr == 'height'){
 
 			if(obj.attr == 'x'){r.cssVar = "left"}
 			if(obj.attr == 'y'){r.cssVar = "top"}
+			if(obj.attr == 'width'){r.cssVar = "width"}
+			if(obj.attr == 'height'){r.cssVar = "height"}
 
 			r.value += "px";
 
@@ -178,7 +179,7 @@ CSSTween.naming = function(parObj, unit){
 
 
 	} else if (	obj.attr == 'scaleX' ||
-				obj.attr == 'scaleY'){
+							obj.attr == 'scaleY') {
 
 		var newScale = parObj.rawObj[obj.attr];
 		r.transform = obj.attr+"("+newScale+")"

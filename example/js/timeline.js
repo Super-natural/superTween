@@ -31,7 +31,7 @@ App.timeline.doStep = function(whatStep){
 			//App.superTween.superLoop(App.dom.elem360, "infinite", {numSteps: 45, stepSize: 161, interval: 50})
 
 			// App.superTween.to(App.dom.elemW, 1, {rotate: 45, ease: 'Bounce.easeOut'});
-			App.superTween.to(App.dom.elemW, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, ease: 'Bounce.easeOut'});
+			App.superTween.to(App.dom.elemW, 1, {width: 300, height:300, scaleY: 0.5, scaleX: 2, ease: 'Bounce.easeOut'});
 			App.superTween.to(App.dom.elemX, 1, {y:400, scaleX: 2, rotate: 45, ease: 'Bounce.easeOut', delay: 0.5});
 			 App.superTween.to(App.dom.elemY, 1, {x: 300, scaleY: 0.5, scaleX: 2, rotate: 45, ease: 'Bounce.easeOut', delay: 1,
 			 										onComplete: App.utils.goTo,
@@ -46,7 +46,7 @@ App.timeline.doStep = function(whatStep){
 			break;
 
 		case 2:
-			App.superTween.to(App.dom.elemW, 1, {x: 300, y:100, scaleY: 0.5, scaleX: 2, rotate: 180, opacity: 1,	ease: 'Back.easeOut'});
+			App.superTween.to(App.dom.elemW, 1, {x: 300, y:100, width: 75, height: 75, rotate: 180, opacity: 1,	ease: 'Back.easeOut'});
 			App.superTween.to(App.dom.elemX, 1, {x: 300, y:200, scaleY: 0.5, scaleX: 2, rotate: 180, opacity: 0.5,	ease: 'Back.easeOut', delay: 1});
 			App.superTween.to(App.dom.elemY, 1, {x: 300, y:300, scaleY: 0.5, scaleX: 2, rotate: 180, opacity: 1,	ease: 'Back.easeOut', delay: 2,
 													onComplete: App.utils.goTo,
