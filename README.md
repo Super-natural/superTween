@@ -18,6 +18,8 @@ example:
 		y:500,
 		scaleY: 0.5,
 		scaleX: 2,
+		width: 500,
+		height: 250,
 		rotate: 45,
 		opacity: 0.5,
 		ease: 'Linear.easeNone',
@@ -65,6 +67,8 @@ Starts a tween with the given parameters as detailed below:
 			y: Number,                              //distance to move on y axis (in pixels)
 			scaleX: Number,                         //X Scale
 			scaleY: Number,                         //Y Scale
+			width: Number,													//Height (in pixels)
+			height: Number,													//Width (in pixels)
 			delay: Number,                          //Animation delay (in seconds)
 			transformOrigin: String,								//What point to animate from
 			ease: String,         			//ease to use
